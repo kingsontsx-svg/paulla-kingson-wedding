@@ -4,188 +4,544 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Wedding Admin · P &amp; K</title>
+<title>Wedding Studio · P &amp; K</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* Layout idea: a calm back office in the site's white and lilac; summary tiles first, then a review queue. */
+/* Back office for the film: a dark sidebar "studio", ivory work surface, numbers first. */
 :root{
-  --paper:#ffffff; --soft:#faf7fd; --ink:#2a2427; --muted:#857980; --lilac:#8b6bb5; --lilac-2:#ece3f6; --line:#e6def0;
-  --good:#3f7d5a; --bad:#a3404f; --warn:#b07a1f;
-  --f-display:"Bodoni Moda", Didot, Georgia, serif; --f-body:"Jost", "Helvetica Neue", Arial, sans-serif;
+  --black:#0b0a0c; --ink:#16131a; --ivory:#f3eee5; --paper:#faf7f1; --white:#fff;
+  --lilac:#b8a2dc; --lilac-deep:#6f539b; --mute:#6c6473; --line:#e7e1d6;
+  --good:#3e7a57; --bad:#a3404f; --warn:#a8741c;
+  --f-display:"Instrument Serif", Georgia, serif; --f-body:"Geist", "Helvetica Neue", Arial, sans-serif; --f-mono:"Geist Mono", ui-monospace, monospace;
+  --ease:cubic-bezier(.16,1,.3,1);
   color-scheme:light;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--soft);color:var(--ink);font:300 16px/1.6 var(--f-body)}
-:focus-visible{outline:1.5px solid var(--lilac);outline-offset:3px}
-h1,h2{font-family:var(--f-display);font-weight:400;margin:0}
-.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
-header{background:var(--paper);border-bottom:1px solid var(--line)}
-header .wrap{display:flex;justify-content:space-between;align-items:center;min-height:64px;gap:12px}
-header h1{font-style:italic;font-size:1.5rem}
-.btn{font:500 .7rem/1 var(--f-body);letter-spacing:.2em;text-transform:uppercase;padding:11px 16px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+[hidden]{display:none !important}
+body{margin:0;background:var(--paper);color:var(--ink);font:300 15px/1.55 var(--f-body)}
+:focus-visible{outline:1.5px solid var(--lilac-deep);outline-offset:3px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;margin:0;letter-spacing:-.01em}
+.mono{font:500 .66rem/1.4 var(--f-mono);letter-spacing:.16em;text-transform:uppercase}
+.muted{color:var(--mute)}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:1px solid var(--ink);background:var(--ink);color:var(--ivory);border-radius:999px;cursor:pointer;text-decoration:none;font:500 .66rem var(--f-mono);letter-spacing:.16em;text-transform:uppercase;transition:opacity .2s,transform .2s}
+.btn:hover{transform:translateY(-1px)}
 .btn.ghost{background:transparent;color:var(--ink)}
-.btn.sm{padding:8px 10px;font-size:.62rem}
 .btn.ok{background:var(--good);border-color:var(--good)}
 .btn.no{background:transparent;color:var(--bad);border-color:var(--bad)}
-.btn:disabled{opacity:.5;cursor:wait}
+.btn.sm{padding:7px 11px;font-size:.6rem}
+.btn:disabled{opacity:.5;pointer-events:none}
+input,textarea,select{font:400 .95rem var(--f-body);color:var(--ink);background:var(--white);border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%}
+textarea{min-height:90px;resize:vertical}
+label.f{display:grid;gap:6px}
+label.f > span{font:500 .62rem var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+label.f small{color:var(--mute);font-size:.8rem}
+
 /* login */
-#login{min-height:100vh;display:grid;place-items:center;padding:20px}
-#login form{background:var(--paper);border:1px solid var(--line);padding:36px;width:min(380px,100%);display:grid;gap:18px}
-#login h2{font-size:2rem}
-label{display:grid;gap:6px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-input{font:400 1rem var(--f-body);padding:12px;border:1px solid var(--line);color:var(--ink);background:var(--soft)}
-.err{color:var(--bad);min-height:1.4em;margin:0;font-size:.92rem}
-/* dashboard */
-#app{display:none}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:28px 0}
-.tile{background:var(--paper);border:1px solid var(--line);padding:18px}
-.tile b{display:block;font:400 2.4rem/1 var(--f-display);font-variant-numeric:tabular-nums}
-.tile span{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
-.tile.alert{border-color:var(--lilac);background:var(--lilac-2)}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
-.tabs button{background:none;border:0;padding:12px 16px;font:500 .74rem var(--f-body);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--lilac)}
-.count{display:inline-block;min-width:20px;padding:1px 6px;border-radius:999px;background:var(--lilac);color:#fff;font-size:.66rem;margin-left:6px;letter-spacing:0}
-.panel{display:none;padding:22px 0 60px}.panel.on{display:block}
-.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.toolbar input{min-width:240px}
-.tablewrap{overflow-x:auto;background:var(--paper);border:1px solid var(--line)}
+#login{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+#login .art{background:var(--black) url('/7570.jpg') center 30%/cover;position:relative}
+#login .art::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(11,10,12,.85))}
+#login .art h1{position:absolute;left:40px;bottom:40px;z-index:1;color:var(--ivory);font-size:clamp(3rem,6vw,5.6rem);line-height:.9}
+#login .art h1 i{color:var(--lilac)}
+#login form{align-self:center;justify-self:center;width:min(380px,90%);display:grid;gap:18px}
+#login h2{font-size:2.6rem}
+.err{color:var(--bad);min-height:1.3em;margin:0}
+@media (max-width:760px){#login{grid-template-columns:1fr}#login .art{min-height:34vh}}
+
+/* app shell */
+#app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+aside{background:var(--black);color:var(--ivory);padding:26px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:26px}
+aside .brand{font:400 1.9rem/1 var(--f-display);padding:0 8px}
+aside .brand i{color:var(--lilac)}
+aside nav{display:grid;gap:2px}
+aside nav button{display:flex;justify-content:space-between;align-items:center;background:none;border:0;color:#b9b1c2;text-align:left;padding:10px 12px;border-radius:10px;cursor:pointer;font:400 .95rem var(--f-body)}
+aside nav button:hover{background:rgba(255,255,255,.05);color:var(--ivory)}
+aside nav button[aria-current="page"]{background:rgba(184,162,220,.14);color:var(--ivory)}
+.badge{min-width:20px;padding:1px 7px;border-radius:999px;background:var(--lilac);color:var(--black);font:500 .66rem var(--f-mono);text-align:center}
+aside .foot{margin-top:auto;display:grid;gap:8px}
+aside .foot .btn{justify-content:center;background:transparent;border-color:rgba(243,238,229,.25);color:var(--ivory)}
+main{padding:34px clamp(18px,4vw,48px) 80px;max-width:1240px;width:100%}
+.head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:24px}
+.head h2{font-size:clamp(2.2rem,4vw,3.2rem);line-height:1}
+.panel{display:none;animation:in .5s var(--ease)}
+.panel.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (max-width:900px){#app{grid-template-columns:1fr}aside{position:sticky;top:0;height:auto;z-index:5;flex-direction:row;align-items:center;padding:12px;gap:10px;overflow-x:auto}aside .brand{font-size:1.3rem;flex:none}aside nav{display:flex}aside nav button{white-space:nowrap;padding:8px 10px;font-size:.85rem}aside .foot{display:none}}
+
+/* overview */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.tile{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:18px 18px 16px}
+.tile b{display:block;font:400 2.8rem/1 var(--f-display);font-variant-numeric:tabular-nums;margin-top:8px}
+.tile.dark{background:var(--black);color:var(--ivory);border-color:var(--black)}
+.tile.dark .mono{color:var(--lilac)}
+.tile.alert{border-color:var(--lilac-deep);box-shadow:0 0 0 3px rgba(111,83,155,.12)}
+.bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:12px;display:flex}
+.bar i{display:block;height:100%}
+.legend{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--mute)}
+.legend span::before{content:"";width:9px;height:9px;border-radius:3px;background:var(--c)}
+.grid2{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}
+.box{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:20px}
+.box h3{font-size:1.5rem;margin-bottom:12px}
+.feed{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.feed li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding-bottom:10px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+
+/* tables */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.toolbar input{max-width:280px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--white)}
+.seg button{border:0;background:none;padding:7px 12px;border-radius:999px;cursor:pointer;font:500 .62rem var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--ivory)}
+.tablewrap{background:var(--white);border:1px solid var(--line);border-radius:16px;overflow:auto}
 table{width:100%;border-collapse:collapse;font-size:.92rem}
-th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--soft)}
-.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.66rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
-.pill.approved,.pill.yes{background:#e3f1e8;color:var(--good)}
-.pill.rejected,.pill.no{background:#f6e3e6;color:var(--bad)}
-.pill.pending{background:#fbf0dc;color:var(--warn)}
-.items{display:grid;gap:12px}
-.item{background:var(--paper);border:1px solid var(--line);padding:16px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
-.item.pending{border-left:3px solid var(--warn)}
-.item img{width:110px;height:110px;object-fit:cover;display:block}
-.item p{margin:0 0 6px;font-family:var(--f-display);font-size:1.08rem;font-style:italic}
-.item small{color:var(--muted)}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 .6rem var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);background:var(--paper);position:sticky;top:0}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font:500 .6rem var(--f-mono);letter-spacing:.12em;text-transform:uppercase}
+.pill.approved,.pill.yes,.pill.received{background:#e2f0e7;color:var(--good)}
+.pill.rejected,.pill.no{background:#f5e3e6;color:var(--bad)}
+.pill.pending{background:#f8eedb;color:var(--warn)}
+.pill.reserved{background:#ece5f6;color:var(--lilac-deep)}
+
+/* queue */
+.queue{display:grid;gap:12px}
+.qi{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+.qi.pending{border-left:4px solid var(--warn)}
+.qi img{width:120px;height:120px;object-fit:cover;border-radius:10px}
+.qi p{margin:0 0 6px;font:400 1.2rem/1.35 var(--f-display)}
 .acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.muted{color:var(--muted)}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;font-size:.9rem;opacity:0;transition:opacity .3s;pointer-events:none}
-.toast.show{opacity:1}
-@media (max-width:640px){.item{grid-template-columns:1fr}.acts{justify-content:flex-start}.item img{width:100%;height:220px}}
+@media (max-width:640px){.qi{grid-template-columns:1fr}.acts{justify-content:flex-start}.qi img{width:100%;height:220px}}
+
+/* content form */
+.form{display:grid;gap:16px}
+.fs{background:var(--white);border:1px solid var(--line);border-radius:16px;padding:22px;display:grid;gap:16px}
+.fs h3{font-size:1.5rem}
+.fs .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:700px){.fs .two{grid-template-columns:1fr}}
+.savebar{position:sticky;bottom:16px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--black);color:var(--ivory);border-radius:999px;padding:10px 12px 10px 22px;box-shadow:0 20px 40px -20px rgba(0,0,0,.5);transform:translateY(140%);opacity:0;transition:all .5s var(--ease)}
+.savebar.show{transform:none;opacity:1}
+.savebar .btn{background:var(--lilac);border-color:var(--lilac);color:var(--black)}
+.faqrow{display:grid;grid-template-columns:1fr 1.4fr auto;gap:8px;align-items:start}
+
+/* media */
+.media{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.mi{position:relative;border-radius:12px;overflow:hidden;background:var(--line);aspect-ratio:3/4;border:2px solid transparent;cursor:grab}
+.mi img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.mi .n{position:absolute;top:8px;left:8px;background:rgba(11,10,12,.7);color:#fff;border-radius:999px;padding:2px 8px;font:500 .62rem var(--f-mono)}
+.mi .x{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(11,10,12,.75);color:#fff;cursor:pointer}
+.mi .mv{position:absolute;bottom:6px;left:6px;right:6px;display:flex;justify-content:space-between}
+.mi .mv button{width:30px;height:30px;border-radius:50%;border:0;background:rgba(255,255,255,.9);cursor:pointer}
+.mi.drag{opacity:.4}.mi.over{border-color:var(--lilac-deep)}
+.upl{display:grid;place-items:center;gap:6px;border:1.5px dashed var(--lilac-deep);border-radius:12px;aspect-ratio:3/4;cursor:pointer;color:var(--lilac-deep);text-align:center;padding:10px;background:rgba(111,83,155,.04)}
+.upl input{position:absolute;width:1px;height:1px;opacity:0}
+.song{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.song audio{width:min(420px,100%)}
+progress{width:100%;height:6px;accent-color:var(--lilac-deep)}
+
+/* gifts editor */
+.gl{display:grid;gap:10px}
+.gr{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;background:var(--white);border:1px solid var(--line);border-radius:14px;padding:12px}
+.gr .th{width:64px;height:64px;border-radius:10px;background:var(--line) center/cover}
+.gr h4{margin:0;font:400 1.2rem var(--f-display)}
+
+.modal{position:fixed;inset:0;background:rgba(11,10,12,.5);display:grid;place-items:center;padding:16px;z-index:20;opacity:0;visibility:hidden;transition:all .3s}
+.modal.open{opacity:1;visibility:visible}
+.modal .box{width:min(520px,100%);display:grid;gap:14px;max-height:90vh;overflow:auto}
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,20px);background:var(--ink);color:var(--ivory);padding:11px 18px;border-radius:999px;opacity:0;transition:all .4s var(--ease);pointer-events:none;z-index:30;font-size:.9rem}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.empty{font:italic 400 1.2rem var(--f-display);color:var(--mute);padding:20px 0}
 </style>
 </head>
 <body>
 
-<section id="login">
+<section id="login" hidden>
+  <div class="art"><h1>Paulla <i>&amp;</i><br>Kingson</h1></div>
   <form id="login-form">
-    <h2>Admin sign in</h2>
-    <p class="muted" style="margin:0">Paulla &amp; Kingson's wedding</p>
-    <label for="pw">Password<input id="pw" type="password" autocomplete="current-password" required></label>
+    <p class="mono muted">Wedding studio</p>
+    <h2>Sign in</h2>
+    <label class="f" for="pw"><span>Password</span><input id="pw" type="password" autocomplete="current-password" required></label>
     <p class="err" id="login-err" role="alert"></p>
-    <button class="btn" type="submit" id="login-btn">Sign in</button>
+    <button class="btn" type="submit" id="login-btn" style="justify-content:center">Enter the studio</button>
   </form>
 </section>
 
-<div id="app">
-  <header><div class="wrap"><h1>P &amp; K · Admin</h1><div style="display:flex;gap:8px"><a class="btn ghost" href="/" target="_blank" rel="noopener">View site</a><button class="btn ghost" id="logout">Sign out</button></div></div></header>
-  <main class="wrap">
-    <div class="tiles" id="tiles"></div>
-    <div class="tabs" role="tablist">
-      <button role="tab" aria-selected="true" data-tab="rsvps">RSVPs</button>
-      <button role="tab" aria-selected="false" data-tab="messages">Wishes <span class="count" id="c-msg" hidden></span></button>
-      <button role="tab" aria-selected="false" data-tab="photos">Photos <span class="count" id="c-pho" hidden></span></button>
+<div id="app" hidden>
+  <aside>
+    <div class="brand">P <i>&amp;</i> K</div>
+    <nav id="tabs">
+      <button data-tab="overview" aria-current="page">Overview</button>
+      <button data-tab="rsvps">RSVPs</button>
+      <button data-tab="approvals">Approvals <span class="badge" id="b-appr" hidden></span></button>
+      <button data-tab="gifts">Gifts <span class="badge" id="b-gift" hidden></span></button>
+      <button data-tab="fund">Honeymoon fund <span class="badge" id="b-fund" hidden></span></button>
+      <button data-tab="content">Content</button>
+      <button data-tab="media">Photos &amp; music</button>
+    </nav>
+    <div class="foot">
+      <a class="btn" href="/" target="_blank" rel="noopener">View site ↗</a>
+      <button class="btn" id="logout" type="button">Sign out</button>
     </div>
-    <section class="panel on" id="p-rsvps">
-      <div class="toolbar"><input id="q" type="search" placeholder="Search by name or phone" aria-label="Search RSVPs"><a class="btn" href="/api/admin/export">Export CSV</a></div>
-      <div class="tablewrap"><table><thead><tr><th>Name</th><th>Reply</th><th>Guests</th><th>Phone</th><th>With</th><th>Note</th><th>When</th><th></th></tr></thead><tbody id="rsvp-rows"></tbody></table></div>
+  </aside>
+
+  <main>
+    <!-- Overview -->
+    <section class="panel on" id="p-overview">
+      <div class="head"><div><p class="mono muted" id="today"></p><h2 id="greet">Welcome back</h2></div><button class="btn ghost" id="refresh" type="button">Refresh</button></div>
+      <div class="tiles" id="tiles"></div>
+      <div class="grid2">
+        <div class="box"><h3>Replies</h3><div class="bar" id="rbar"></div><div class="legend" id="rlegend"></div><ul class="feed" id="feed" style="margin-top:18px"></ul></div>
+        <div class="box"><h3>To do</h3><ul class="feed" id="todo"></ul></div>
+      </div>
     </section>
-    <section class="panel" id="p-messages"><div class="items" id="msg-list"></div></section>
-    <section class="panel" id="p-photos"><div class="items" id="photo-list"></div></section>
+
+    <!-- RSVPs -->
+    <section class="panel" id="p-rsvps">
+      <div class="head"><h2>RSVPs</h2><a class="btn" href="/api/admin/export">Export CSV</a></div>
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="Search name or phone" aria-label="Search RSVPs">
+        <div class="seg" id="rf"><button aria-pressed="true" data-v="all">All</button><button aria-pressed="false" data-v="yes">Coming</button><button aria-pressed="false" data-v="no">Declined</button></div>
+        <span class="muted" id="rcount"></span>
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>Name</th><th>Reply</th><th>Guests</th><th>Phone</th><th>With</th><th>Note</th><th>When</th><th></th></tr></thead><tbody id="rrows"></tbody></table></div>
+    </section>
+
+    <!-- Approvals -->
+    <section class="panel" id="p-approvals">
+      <div class="head"><h2>Approvals</h2><div class="seg" id="af"><button aria-pressed="true" data-v="pending">Waiting</button><button aria-pressed="false" data-v="approved">Live</button><button aria-pressed="false" data-v="rejected">Hidden</button></div></div>
+      <div class="queue" id="queue"></div>
+    </section>
+
+    <!-- Gifts -->
+    <section class="panel" id="p-gifts">
+      <div class="head"><h2>Wishlist</h2><button class="btn" id="add-gift" type="button">Add gift</button></div>
+      <div class="gl" id="glist"></div>
+    </section>
+
+    <!-- Fund -->
+    <section class="panel" id="p-fund">
+      <div class="head"><h2>Honeymoon fund</h2></div>
+      <div class="tiles" id="ftiles" style="margin-bottom:16px"></div>
+      <p class="muted" style="margin:0 0 14px">Pledges count toward the total on the site only after you mark them as received.</p>
+      <div class="tablewrap"><table><thead><tr><th>Name</th><th>Amount</th><th>Contact</th><th>Note</th><th>Status</th><th>When</th><th></th></tr></thead><tbody id="frows"></tbody></table></div>
+    </section>
+
+    <!-- Content -->
+    <section class="panel" id="p-content">
+      <div class="head"><div><h2>Content</h2><p class="muted" style="margin:6px 0 0">Changes go live on the site as soon as you save.</p></div></div>
+      <form class="form" id="cform" novalidate>
+        <div class="fs"><h3>The couple</h3>
+          <div class="two"><label class="f"><span>Bride</span><input name="bride"></label><label class="f"><span>Groom</span><input name="groom"></label></div>
+          <label class="f"><span>Invitation line</span><textarea name="invite_line"></textarea></label>
+          <label class="f"><span>Families</span><input name="families"></label>
+        </div>
+        <div class="fs"><h3>The day</h3>
+          <div class="two"><label class="f"><span>Date &amp; start time</span><input name="date_iso" type="datetime-local"><small>Lagos time. Drives the countdown and calendar invite.</small></label><label class="f"><span>Time shown to guests</span><input name="time_label" placeholder="e.g. 12 noon prompt"></label></div>
+          <div class="two"><label class="f"><span>Venue name</span><input name="venue_name"></label><label class="f"><span>City</span><input name="city"></label></div>
+          <label class="f"><span>Venue address</span><input name="venue_address"><small>Adds a Directions button on the site.</small></label>
+          <div class="two"><label class="f"><span>Dress code</span><input name="dress_code"></label><label class="f"><span>Dress code note</span><input name="dress_note"></label></div>
+          <div class="two"><label class="f"><span>RSVP by</span><input name="rsvp_deadline" placeholder="e.g. 28 November"></label><label class="f"><span>WhatsApp number</span><input name="whatsapp" placeholder="e.g. 2348031234567"><small>Country code, no +. Shows "Message us" buttons.</small></label></div>
+        </div>
+        <div class="fs"><h3>Gifts</h3>
+          <div class="two"><label class="f"><span>Cash gift title</span><input name="cash_title"></label><label class="f"><span>Honeymoon fund goal (₦)</span><input name="fund_goal" inputmode="numeric"></label></div>
+          <label class="f"><span>Cash gift intro</span><textarea name="cash_note"></textarea></label>
+          <label class="f"><span>Cash gift details</span><textarea name="cash_details" placeholder="Bank&#10;Account name&#10;Account number"></textarea><small>Shown exactly as typed on the gift card, with a Copy button.</small></label>
+          <label class="f"><span>Honeymoon fund note</span><textarea name="fund_note"></textarea></label>
+        </div>
+        <div class="fs"><h3>Getting there</h3>
+          <label class="f"><span>Flying in</span><textarea name="travel_note"></textarea></label>
+          <label class="f"><span>Where to stay</span><textarea name="stay_note"></textarea></label>
+          <div><span class="mono muted">Questions &amp; answers</span><div id="faqs" style="display:grid;gap:8px;margin-top:8px"></div><button class="btn ghost sm" type="button" id="add-faq" style="margin-top:10px">Add question</button></div>
+        </div>
+        <div class="savebar" id="savebar"><span>You have unsaved changes</span><div style="display:flex;gap:8px"><button class="btn sm" type="button" id="discard" style="background:transparent;color:var(--ivory);border-color:rgba(243,238,229,.3)">Discard</button><button class="btn sm" type="submit" id="save">Save changes</button></div></div>
+      </form>
+    </section>
+
+    <!-- Media -->
+    <section class="panel" id="p-media">
+      <div class="head"><div><h2>Photos &amp; music</h2><p class="muted" style="margin:6px 0 0">The first three photos open the site. Drag to reorder.</p></div><button class="btn" id="save-gallery" type="button" disabled>Save order</button></div>
+      <div class="media" id="media"></div>
+      <div class="box" style="margin-top:20px"><h3>Music</h3>
+        <div class="song"><audio id="song-prev" controls preload="none"></audio>
+          <label class="btn" for="song-file" style="cursor:pointer">Upload new song</label><input type="file" id="song-file" accept="audio/*" hidden>
+        </div>
+        <progress id="song-prog" max="100" value="0" hidden></progress>
+        <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
+          <label class="f"><span>Song title</span><input id="song-title"></label><label class="f"><span>Artist</span><input id="song-artist"></label>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap"><small class="muted">MP3 or M4A, up to 40 MB. The site is public, so use music you have the rights to share.</small><button class="btn" id="save-song" type="button">Save music</button></div>
+      </div>
+    </section>
   </main>
+</div>
+
+<div class="modal" id="gmodal" role="dialog" aria-modal="true" aria-labelledby="gm-h">
+  <form class="box" id="gform" novalidate>
+    <h3 id="gm-h">Add gift</h3>
+    <input type="hidden" name="id">
+    <label class="f"><span>Name</span><input name="title" required maxlength="120"></label>
+    <div class="two" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><label class="f"><span>Price</span><input name="price" placeholder="₦85,000" maxlength="40"></label><label class="f"><span>Order</span><input name="sort" type="number" value="0"></label></div>
+    <label class="f"><span>Note</span><input name="note" maxlength="300"></label>
+    <label class="f"><span>Shop link (optional)</span><input name="link" placeholder="https://"></label>
+    <label class="f"><span>Picture</span><input type="file" id="g-img" accept="image/*"><input type="hidden" name="image"><img id="g-prev" alt="" style="max-height:120px;border-radius:10px" hidden></label>
+    <div style="display:flex;justify-content:space-between;gap:10px"><button class="btn ghost" type="button" id="gcancel">Cancel</button><button class="btn" type="submit">Save gift</button></div>
+    <p class="err" id="gerr"></p>
+  </form>
 </div>
 <div class="toast" id="toast" role="status"></div>
 
-<script>
-const $ = id => document.getElementById(id);
+<script type="module">
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
 const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const when = d => new Date(d).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
-let DATA = {rsvps:[],messages:[],photos:[]};
-
-function toast(t){ const el=$("toast"); el.textContent=t; el.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove("show"),2200); }
-async function call(path, opts={}){
-  const r = await fetch(path, {credentials:"same-origin", ...opts, headers:{"Content-Type":"application/json"}});
+const naira = n => "₦" + Math.round(Number(n)||0).toLocaleString("en-NG");
+let D = null;
+function toast(t){ const el=$("#toast"); el.textContent=t; el.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove("show"),2400); }
+async function call(path, body, method){
+  const r = await fetch(path, {method: method || (body ? "POST" : "GET"), credentials:"same-origin", headers:{"Content-Type":"application/json"}, body: body ? JSON.stringify(body) : undefined});
   const d = await r.json().catch(()=>({}));
-  if (r.status===401 && path!=="/api/admin/login") { showLogin(); throw new Error("Please sign in again."); }
+  if (r.status === 401 && path !== "/api/admin/login") { showLogin(); throw new Error("Please sign in again."); }
   if (!r.ok) throw new Error(d.error || "Something went wrong.");
   return d;
 }
-function showLogin(){ $("app").style.display="none"; $("login").style.display="grid"; $("pw").focus(); }
-function showApp(){ $("login").style.display="none"; $("app").style.display="block"; load(); }
 
-$("login-form").addEventListener("submit", async e=>{
-  e.preventDefault(); $("login-err").textContent=""; $("login-btn").disabled=true;
-  try{ await call("/api/admin/login",{method:"POST",body:JSON.stringify({password:$("pw").value})}); $("pw").value=""; showApp(); }
-  catch(err){ $("login-err").textContent=err.message; }
-  finally{ $("login-btn").disabled=false; }
+/* ---------- auth ---------- */
+function showLogin(){ $("#app").hidden = true; $("#login").hidden = false; setTimeout(()=>$("#pw").focus(), 50); }
+function showApp(){ $("#login").hidden = true; $("#app").hidden = false; load(); }
+$("#login-form").addEventListener("submit", async e => {
+  e.preventDefault(); $("#login-err").textContent = ""; $("#login-btn").disabled = true;
+  try { await call("/api/admin/login", {password: $("#pw").value}); $("#pw").value = ""; showApp(); }
+  catch (err) { $("#login-err").textContent = err.message; }
+  finally { $("#login-btn").disabled = false; }
 });
-$("logout").onclick = async ()=>{ await call("/api/admin/login",{method:"DELETE"}).catch(()=>{}); showLogin(); };
+$("#logout").onclick = async () => { await call("/api/admin/login", null, "DELETE").catch(()=>{}); showLogin(); };
 
-document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
-  document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected", x===b));
-  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on", p.id==="p-"+b.dataset.tab));
-});
+/* ---------- tabs ---------- */
+function tab(name){
+  $$("#tabs button").forEach(b => { if (b.dataset.tab === name) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
+  $$(".panel").forEach(p => p.classList.toggle("on", p.id === "p-" + name));
+  if (location.hash !== "#" + name) history.replaceState(null, "", "#" + name);
+  window.scrollTo({top:0});
+}
+$$("#tabs button").forEach(b => b.onclick = () => tab(b.dataset.tab));
 
+/* ---------- data ---------- */
 async function load(){
-  try{ DATA = await call("/api/admin/data"); render(); }
-  catch(err){ toast(err.message); }
+  try { D = await call("/api/admin/data"); renderAll(); }
+  catch (err) { toast(err.message); }
 }
-function render(){
-  const r=DATA.rsvps, yes=r.filter(x=>x.attending), heads=yes.reduce((s,x)=>s+(x.guests||1),0);
-  const pm=DATA.messages.filter(x=>x.status==="pending").length, pp=DATA.photos.filter(x=>x.status==="pending").length;
-  $("tiles").innerHTML = `
-    <div class="tile"><b>${heads}</b><span>Guests coming</span></div>
-    <div class="tile"><b>${yes.length}</b><span>Yes replies</span></div>
-    <div class="tile"><b>${r.length-yes.length}</b><span>Declined</span></div>
-    <div class="tile ${pm+pp?"alert":""}"><b>${pm+pp}</b><span>Waiting for approval</span></div>`;
-  $("c-msg").hidden=!pm; $("c-msg").textContent=pm; $("c-pho").hidden=!pp; $("c-pho").textContent=pp;
-  renderRsvps();
-  $("msg-list").innerHTML = DATA.messages.length ? DATA.messages.map(m=>`
-    <div class="item ${m.status}"><span class="pill ${m.status}">${m.status}</span>
-      <div><p>“${esc(m.body)}”</p><small>${esc(m.name)} · ${when(m.created_at)}</small></div>
-      <div class="acts">${acts("message",m)}</div></div>`).join("") : '<p class="muted">No wishes yet.</p>';
-  $("photo-list").innerHTML = DATA.photos.length ? DATA.photos.map(p=>`
-    <div class="item ${p.status}"><a href="${esc(p.url)}" target="_blank" rel="noopener"><img src="${esc(p.url)}" alt="${esc(p.caption||"Guest photo")}"></a>
-      <div><span class="pill ${p.status}">${p.status}</span><p>${esc(p.caption||"No caption")}</p><small>${esc(p.name)} · ${when(p.created_at)}</small></div>
-      <div class="acts">${acts("photo",p)}</div></div>`).join("") : '<p class="muted">No photos yet.</p>';
-}
-function acts(type,x){
-  const b=[];
-  if(x.status!=="approved") b.push(`<button class="btn sm ok" data-act="approve" data-type="${type}" data-id="${x.id}">Approve</button>`);
-  if(x.status!=="rejected") b.push(`<button class="btn sm no" data-act="reject" data-type="${type}" data-id="${x.id}">${x.status==="approved"?"Hide":"Reject"}</button>`);
-  b.push(`<button class="btn sm ghost" data-act="delete" data-type="${type}" data-id="${x.id}">Delete</button>`);
-  return b.join("");
-}
-function renderRsvps(){
-  const q=$("q").value.trim().toLowerCase();
-  const rows=DATA.rsvps.filter(x=>!q || (x.name+" "+(x.phone||"")).toLowerCase().includes(q));
-  $("rsvp-rows").innerHTML = rows.length ? rows.map(x=>`<tr>
-    <td>${esc(x.name)}</td><td><span class="pill ${x.attending?"yes":"no"}">${x.attending?"Coming":"Declined"}</span></td>
-    <td>${x.attending?x.guests:"–"}</td><td>${esc(x.phone)}</td><td>${esc(x.side)}</td><td>${esc(x.note)}</td>
-    <td class="muted">${when(x.created_at)}</td>
-    <td><button class="btn sm ghost" data-act="delete" data-type="rsvp" data-id="${x.id}">Delete</button></td></tr>`).join("")
-    : `<tr><td colspan="8" class="muted">${DATA.rsvps.length?"No matches.":"No RSVPs yet."}</td></tr>`;
-}
-$("q").addEventListener("input", renderRsvps);
+$("#refresh").onclick = () => load().then(()=>toast("Up to date"));
+function renderAll(){ renderOverview(); renderRsvps(); renderQueue(); renderGifts(); renderFund(); if (!dirty) fillContent(); renderMedia(); }
 
-let confirmTimer=null;
-document.addEventListener("click", async e=>{
-  const b=e.target.closest("button[data-act]"); if(!b) return;
-  const {act,type,id}=b.dataset;
-  if(act==="delete" && b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Tap again to delete"; clearTimeout(confirmTimer); confirmTimer=setTimeout(()=>{b.dataset.armed="";b.textContent="Delete";},3000); return; }
-  b.disabled=true;
-  try{ await call("/api/admin/moderate",{method:"POST",body:JSON.stringify({type,id,action:act})}); toast(act==="approve"?"Approved. It's now on the site.":act==="reject"?"Hidden from the site.":"Deleted."); await load(); }
-  catch(err){ toast(err.message); b.disabled=false; }
+/* ---------- overview ---------- */
+function renderOverview(){
+  const r = D.rsvps, yes = r.filter(x=>x.attending), heads = yes.reduce((s,x)=>s+(x.guests||1),0);
+  const pend = D.messages.filter(x=>x.status==="pending").length + D.photos.filter(x=>x.status==="pending").length;
+  const reserved = D.gifts.filter(g=>g.reserved_by).length;
+  const fundPend = D.pledges.filter(p=>p.status==="pending").length;
+  const received = D.pledges.filter(p=>p.status==="received").reduce((s,p)=>s+Number(p.amount),0);
+  const days = Math.max(0, Math.ceil((new Date(D.settings.date_iso + "+01:00") - Date.now())/864e5));
+  $("#today").textContent = new Date().toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"long"});
+  $("#greet").innerHTML = `${days} days to go, <i style="color:var(--lilac-deep)">${esc(D.settings.bride)} &amp; ${esc(D.settings.groom)}</i>`;
+  $("#tiles").innerHTML = `
+    <div class="tile dark"><span class="mono">Guests coming</span><b>${heads}</b><small class="muted">${yes.length} ${yes.length===1?"reply":"replies"}</small></div>
+    <div class="tile"><span class="mono muted">Declined</span><b>${r.length-yes.length}</b></div>
+    <div class="tile ${pend?"alert":""}"><span class="mono muted">Waiting for approval</span><b>${pend}</b></div>
+    <div class="tile"><span class="mono muted">Gifts reserved</span><b>${reserved}<small style="font-size:1rem" class="muted"> / ${D.gifts.length}</small></b></div>
+    <div class="tile"><span class="mono muted">Fund received</span><b style="font-size:2rem">${naira(received)}</b><small class="muted">${fundPend} pledge${fundPend===1?"":"s"} to confirm</small></div>`;
+  const total = r.length || 1, sides = {};
+  yes.forEach(x => sides[x.side||"Other"] = (sides[x.side||"Other"]||0) + (x.guests||1));
+  $("#rbar").innerHTML = `<i style="width:${yes.length/total*100}%;background:var(--good)"></i><i style="width:${(r.length-yes.length)/total*100}%;background:var(--bad)"></i>`;
+  $("#rlegend").innerHTML = `<span style="--c:var(--good)">Coming ${yes.length}</span><span style="--c:var(--bad)">Declined ${r.length-yes.length}</span>` + Object.entries(sides).map(([k,v])=>`<span style="--c:var(--lilac)">${esc(k)}: ${v}</span>`).join("");
+  $("#feed").innerHTML = r.slice(0,6).map(x=>`<li><span>${esc(x.name)} <span class="pill ${x.attending?"yes":"no"}">${x.attending?`+${x.guests}`:"no"}</span></span><span class="muted">${when(x.created_at)}</span></li>`).join("") || '<li class="muted">No replies yet.</li>';
+  const todo = [];
+  if (pend) todo.push([`${pend} wish${pend===1?"":"es"}/photos to review`, "approvals"]);
+  if (fundPend) todo.push([`${fundPend} pledge${fundPend===1?"":"s"} to confirm`, "fund"]);
+  if (!D.settings.venue_name) todo.push(["Add the venue", "content"]);
+  if (!D.settings.time_label) todo.push(["Add the start time", "content"]);
+  if (!D.settings.cash_details) todo.push(["Add cash gift details", "content"]);
+  if (!D.gifts.length) todo.push(["Add wishlist gifts", "gifts"]);
+  if (!D.settings.whatsapp) todo.push(["Add your WhatsApp number", "content"]);
+  $("#todo").innerHTML = todo.map(([t,k])=>`<li><span>${t}</span><button class="btn ghost sm" data-goto="${k}">Open</button></li>`).join("") || '<li class="muted">All set. Enjoy the countdown.</li>';
+  $$("[data-goto]").forEach(b => b.onclick = () => tab(b.dataset.goto));
+  const b = (id, n) => { $(id).hidden = !n; $(id).textContent = n; };
+  b("#b-appr", pend); b("#b-fund", fundPend); b("#b-gift", 0);
+}
+
+/* ---------- RSVPs ---------- */
+let rFilter = "all";
+$$("#rf button").forEach(b => b.onclick = () => { rFilter = b.dataset.v; $$("#rf button").forEach(x=>x.setAttribute("aria-pressed", x===b)); renderRsvps(); });
+$("#q").addEventListener("input", renderRsvps);
+function renderRsvps(){
+  if (!D) return;
+  const q = $("#q").value.trim().toLowerCase();
+  const rows = D.rsvps.filter(x => (rFilter==="all" || (rFilter==="yes") === x.attending) && (!q || (x.name+" "+(x.phone||"")).toLowerCase().includes(q)));
+  $("#rcount").textContent = `${rows.length} shown`;
+  $("#rrows").innerHTML = rows.map(x=>`<tr><td>${esc(x.name)}</td><td><span class="pill ${x.attending?"yes":"no"}">${x.attending?"Coming":"Declined"}</span></td><td>${x.attending?x.guests:"–"}</td><td>${x.phone?`<a href="tel:${esc(x.phone)}">${esc(x.phone)}</a>`:""}</td><td>${esc(x.side)}</td><td>${esc(x.note)}</td><td class="muted">${when(x.created_at)}</td><td>${del("rsvp",x.id)}</td></tr>`).join("") || `<tr><td colspan="8" class="muted">${D.rsvps.length?"No matches.":"No RSVPs yet."}</td></tr>`;
+}
+const del = (type,id,label="Delete") => `<button class="btn ghost sm" data-act="delete" data-type="${type}" data-id="${id}">${label}</button>`;
+
+/* ---------- approvals ---------- */
+let aFilter = "pending";
+$$("#af button").forEach(b => b.onclick = () => { aFilter = b.dataset.v; $$("#af button").forEach(x=>x.setAttribute("aria-pressed", x===b)); renderQueue(); });
+function renderQueue(){
+  const items = [...D.messages.map(m=>({...m,type:"message"})), ...D.photos.map(p=>({...p,type:"photo"}))].filter(x=>x.status===aFilter).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+  $("#queue").innerHTML = items.map(x=>`<div class="qi ${x.status}">
+    ${x.type==="photo"?`<a href="${esc(x.url)}" target="_blank" rel="noopener"><img src="${esc(x.url)}" alt=""></a>`:`<span class="pill reserved">Wish</span>`}
+    <div><p>${x.type==="photo"?esc(x.caption||"No caption"):"“"+esc(x.body)+"”"}</p><span class="muted">${esc(x.name)} · ${when(x.created_at)}</span></div>
+    <div class="acts">${x.status!=="approved"?`<button class="btn ok sm" data-act="approve" data-type="${x.type}" data-id="${x.id}">Approve</button>`:""}${x.status!=="rejected"?`<button class="btn no sm" data-act="reject" data-type="${x.type}" data-id="${x.id}">${x.status==="approved"?"Hide":"Reject"}</button>`:""}${del(x.type,x.id)}</div></div>`).join("")
+    || `<p class="empty">${aFilter==="pending"?"Nothing waiting. You're all caught up.":"Nothing here yet."}</p>`;
+}
+
+/* ---------- gifts ---------- */
+function renderGifts(){
+  $("#glist").innerHTML = D.gifts.map(g=>`<div class="gr"><div class="th" style="${g.image?`background-image:url('${esc(g.image)}')`:""}"></div>
+    <div><h4>${esc(g.title)} <span class="muted" style="font:400 .85rem var(--f-body)">${esc(g.price||"")}</span></h4>
+    ${g.reserved_by?`<span class="pill reserved">Reserved by ${esc(g.reserved_by)}${g.reserved_contact?" · "+esc(g.reserved_contact):""}</span>`:'<span class="muted">Available</span>'}</div>
+    <div class="acts"><button class="btn ghost sm" data-edit="${g.id}">Edit</button>${g.reserved_by?`<button class="btn ghost sm" data-act="unreserve" data-type="gift" data-id="${g.id}">Release</button>`:""}${del("gift",g.id)}</div></div>`).join("")
+    || '<p class="empty">No gifts yet. Add the first one.</p>';
+  $$("[data-edit]").forEach(b => b.onclick = () => openGift(D.gifts.find(g=>g.id==b.dataset.edit)));
+}
+const gform = $("#gform");
+function openGift(g){
+  gform.reset(); $("#gerr").textContent=""; $("#gm-h").textContent = g ? "Edit gift" : "Add gift";
+  ["id","title","price","sort","note","link","image"].forEach(k => gform[k].value = g ? (g[k] ?? "") : (k==="sort"?0:""));
+  $("#g-prev").hidden = !(g && g.image); if (g && g.image) $("#g-prev").src = g.image;
+  $("#gmodal").classList.add("open"); setTimeout(()=>gform.title.focus(), 100);
+}
+$("#add-gift").onclick = () => openGift(null);
+$("#gcancel").onclick = () => $("#gmodal").classList.remove("open");
+$("#g-img").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const data = await shrink(f, 1200); $("#g-prev").src = data; $("#g-prev").hidden = false; toast("Uploading picture…"); const {url} = await call("/api/admin/image", {image:data}); gform.image.value = url; toast("Picture ready"); }
+  catch (err) { $("#gerr").textContent = err.message; }
+});
+gform.addEventListener("submit", async e => {
+  e.preventDefault();
+  const body = Object.fromEntries(new FormData(gform)); delete body[""];
+  try { await call("/api/admin/gift", body); $("#gmodal").classList.remove("open"); toast("Gift saved"); load(); }
+  catch (err) { $("#gerr").textContent = err.message; }
 });
 
-fetch("/api/admin/login",{credentials:"same-origin"}).then(r=>r.json()).then(d=> d.admin ? showApp() : showLogin()).catch(showLogin);
+/* ---------- fund ---------- */
+function renderFund(){
+  const goal = Number(D.settings.fund_goal)||0, rec = D.pledges.filter(p=>p.status==="received").reduce((s,p)=>s+Number(p.amount),0), pend = D.pledges.filter(p=>p.status==="pending").reduce((s,p)=>s+Number(p.amount),0);
+  $("#ftiles").innerHTML = `<div class="tile dark"><span class="mono">Received</span><b style="font-size:2.2rem">${naira(rec)}</b><small>${goal?Math.round(rec/goal*100)+"% of "+naira(goal):""}</small></div><div class="tile"><span class="mono muted">Pledged, not yet received</span><b style="font-size:2.2rem">${naira(pend)}</b></div>`;
+  $("#frows").innerHTML = D.pledges.map(p=>`<tr><td>${esc(p.name)}</td><td>${naira(p.amount)}</td><td>${esc(p.contact)}</td><td>${esc(p.message)}</td><td><span class="pill ${p.status}">${p.status}</span></td><td class="muted">${when(p.created_at)}</td>
+    <td><div class="acts">${p.status==="pending"?`<button class="btn ok sm" data-act="received" data-type="pledge" data-id="${p.id}">Mark received</button>`:`<button class="btn ghost sm" data-act="pending" data-type="pledge" data-id="${p.id}">Undo</button>`}${del("pledge",p.id)}</div></td></tr>`).join("") || '<tr><td colspan="7" class="muted">No pledges yet.</td></tr>';
+}
+
+/* ---------- moderation actions ---------- */
+document.addEventListener("click", async e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const {act, type, id} = b.dataset;
+  if (act === "delete" && b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Tap to confirm"; setTimeout(()=>{ b.dataset.armed=""; b.textContent="Delete"; }, 3000); return; }
+  b.disabled = true;
+  try { await call("/api/admin/moderate", {type, id, action: act}); toast({approve:"Approved · now live",reject:"Hidden from the site",delete:"Deleted",received:"Marked as received",pending:"Moved back",unreserve:"Gift released"}[act] || "Done"); await load(); }
+  catch (err) { toast(err.message); b.disabled = false; }
+});
+
+/* ---------- content ---------- */
+const cform = $("#cform"); let dirty = false;
+const KEYS = ["bride","groom","invite_line","families","date_iso","time_label","venue_name","city","venue_address","dress_code","dress_note","rsvp_deadline","whatsapp","cash_title","fund_goal","cash_note","cash_details","fund_note","travel_note","stay_note"];
+function fillContent(){
+  KEYS.forEach(k => { if (cform[k]) cform[k].value = D.settings[k] ?? ""; });
+  let faqs = []; try { faqs = JSON.parse(D.settings.faq || "[]"); } catch {}
+  $("#faqs").innerHTML = ""; faqs.forEach(addFaq);
+  setDirty(false);
+}
+function addFaq(x={q:"",a:""}){
+  const row = document.createElement("div"); row.className = "faqrow";
+  row.innerHTML = `<input placeholder="Question" value="${esc(x.q)}" aria-label="Question"><input placeholder="Answer" value="${esc(x.a)}" aria-label="Answer"><button class="btn ghost sm" type="button" aria-label="Remove question">✕</button>`;
+  $("button", row).onclick = () => { row.remove(); setDirty(true); };
+  $("#faqs").appendChild(row);
+}
+$("#add-faq").onclick = () => { addFaq(); setDirty(true); };
+function setDirty(v){ dirty = v; $("#savebar").classList.toggle("show", v); }
+cform.addEventListener("input", () => setDirty(true));
+$("#discard").onclick = () => fillContent();
+cform.addEventListener("submit", async e => {
+  e.preventDefault();
+  const values = {}; KEYS.forEach(k => values[k] = cform[k].value.trim());
+  values.fund_goal = values.fund_goal.replace(/[^\d]/g, "");
+  values.whatsapp = values.whatsapp.replace(/[^\d]/g, "");
+  values.faq = JSON.stringify($$("#faqs .faqrow").map(r => { const [q,a] = $$("input", r); return {q:q.value.trim(), a:a.value.trim()}; }).filter(x=>x.q));
+  $("#save").disabled = true;
+  try { await call("/api/admin/settings", {values}); setDirty(false); toast("Saved · live on the site"); load(); }
+  catch (err) { toast(err.message); }
+  finally { $("#save").disabled = false; }
+});
+addEventListener("beforeunload", e => { if (dirty) { e.preventDefault(); e.returnValue = ""; } });
+
+/* ---------- media ---------- */
+let G = [], gDirty = false;
+function renderMedia(){
+  if (!gDirty) { try { G = JSON.parse(D.settings.gallery || "[]"); } catch { G = []; } }
+  const m = $("#media");
+  m.innerHTML = G.map((p,i)=>`<div class="mi" draggable="true" data-i="${i}"><img src="${esc(p.url)}" alt=""><span class="n">${String(i+1).padStart(2,"0")}${i<3?" · opener":""}</span><button class="x" type="button" data-rm="${i}" aria-label="Remove photo ${i+1}">✕</button><div class="mv"><button type="button" data-mv="${i}:-1" aria-label="Move earlier">←</button><button type="button" data-mv="${i}:1" aria-label="Move later">→</button></div></div>`).join("")
+    + `<label class="upl" for="g-files">+<br><span class="mono">Add photos</span><input type="file" id="g-files" accept="image/*" multiple></label>`;
+  $$("[data-rm]", m).forEach(b => b.onclick = () => { G.splice(+b.dataset.rm, 1); markG(); });
+  $$("[data-mv]", m).forEach(b => b.onclick = () => { const [i,d] = b.dataset.mv.split(":").map(Number), j = i+d; if (j<0||j>=G.length) return; [G[i],G[j]] = [G[j],G[i]]; markG(); });
+  let from = null;
+  $$(".mi", m).forEach(el => {
+    el.addEventListener("dragstart", () => { from = +el.dataset.i; el.classList.add("drag"); });
+    el.addEventListener("dragend", () => el.classList.remove("drag"));
+    el.addEventListener("dragover", e => { e.preventDefault(); el.classList.add("over"); });
+    el.addEventListener("dragleave", () => el.classList.remove("over"));
+    el.addEventListener("drop", e => { e.preventDefault(); const to = +el.dataset.i; if (from===null||from===to) return; const [x] = G.splice(from,1); G.splice(to,0,x); markG(); });
+  });
+  $("#g-files").addEventListener("change", async e => {
+    const files = [...e.target.files]; if (!files.length) return;
+    for (const [i,f] of files.entries()) {
+      try { toast(`Uploading ${i+1} of ${files.length}…`); const data = await shrink(f, 2000, .86); const {url} = await call("/api/admin/image", {image:data}); G.push({url, alt:"Paulla and Kingson"}); markG(); }
+      catch (err) { toast(err.message); }
+    }
+  });
+  $("#song-prev").src = D.settings.song_url || "/song.mp3";
+  if (!songDirty) { $("#song-title").value = D.settings.song_title || ""; $("#song-artist").value = D.settings.song_artist || ""; }
+}
+function markG(){ gDirty = true; $("#save-gallery").disabled = false; renderMedia(); }
+$("#save-gallery").onclick = async () => {
+  if (!G.length) { toast("Keep at least one photo."); return; }
+  try { await call("/api/admin/settings", {values:{gallery: JSON.stringify(G)}}); gDirty = false; $("#save-gallery").disabled = true; toast("Photos saved · live on the site"); load(); }
+  catch (err) { toast(err.message); }
+};
+
+/* song: direct-to-storage upload */
+let songUrl = null, songDirty = false;
+$("#song-title").addEventListener("input", () => songDirty = true);
+$("#song-artist").addEventListener("input", () => songDirty = true);
+$("#song-file").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 40*1024*1024) { toast("That file is over 40 MB."); return; }
+  const prog = $("#song-prog"); prog.hidden = false; prog.value = 0;
+  try {
+    const { upload } = await import("https://esm.sh/@vercel/blob@2.8.2/client");
+    const safe = f.name.replace(/[^\w.\-]+/g, "-");
+    const blob = await upload(`music/${safe}`, f, { access:"public", handleUploadUrl:"/api/admin/upload", onUploadProgress: ev => prog.value = ev.percentage });
+    songUrl = blob.url; songDirty = true; $("#song-prev").src = songUrl;
+    if (!$("#song-title").value || $("#song-title").value === D.settings.song_title) $("#song-title").value = f.name.replace(/\.[^.]+$/, "");
+    toast("Uploaded. Press Save music to put it live.");
+  } catch (err) { toast(err.message || "Upload failed"); }
+  finally { prog.hidden = true; }
+});
+$("#save-song").onclick = async () => {
+  const values = { song_title: $("#song-title").value.trim(), song_artist: $("#song-artist").value.trim() };
+  if (songUrl) values.song_url = songUrl;
+  try { await call("/api/admin/settings", {values}); songUrl = null; songDirty = false; toast("Music saved · live on the site"); load(); }
+  catch (err) { toast(err.message); }
+};
+
+/* ---------- utils ---------- */
+function shrink(file, max=1600, q=.84){
+  return new Promise((ok,bad)=>{ const img=new Image(); img.onload=()=>{ const k=Math.min(1,max/Math.max(img.width,img.height)); const c=document.createElement("canvas"); c.width=Math.round(img.width*k); c.height=Math.round(img.height*k); c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(img.src); ok(c.toDataURL("image/jpeg",q)); }; img.onerror=()=>bad(new Error("That file isn't an image we can read.")); img.src=URL.createObjectURL(file); });
+}
+
+/* ---------- boot ---------- */
+const start = (location.hash||"").slice(1);
+fetch("/api/admin/login",{credentials:"same-origin"}).then(r=>r.json()).then(d => { if (d.admin) { showApp(); if (start && $(`#p-${start}`)) tab(start); } else showLogin(); }).catch(showLogin);
 </script>
 </body>
 </html>
