@@ -193,6 +193,27 @@ form{display:grid;gap:26px}
 .thanks h3{font-size:2.6rem;font-style:italic}
 @media (max-width:760px){.rsvp,.day,.hero .wrap{grid-template-columns:1fr}.two{grid-template-columns:1fr}.hero-photo{justify-self:center}.badge{left:-10px}}
 
+/* wishes & guest photos */
+.wishes{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:start}
+.wall{display:grid;gap:14px;margin-top:30px;max-height:520px;overflow:auto;padding-right:6px}
+.wish{background:var(--white);border:1px solid var(--line);padding:20px 22px;position:relative;animation:rise .8s var(--ease) both}
+.wish p{margin:0 0 10px;font:italic 400 1.15rem/1.5 var(--f-display)}
+.wish small{font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;color:var(--rose)}
+.empty{grid-column:1/-1;color:var(--muted);font-style:italic;font-family:var(--f-display);font-size:1.1rem}
+.mini-form{display:grid;gap:22px;margin-top:34px}
+.photo-wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:30px}
+.photo-wall figure{margin:0;position:relative;overflow:hidden;aspect-ratio:1;background:var(--rose-2);animation:rise .8s var(--ease) both}
+.photo-wall img{width:100%;height:100%;object-fit:cover;transition:transform 1s var(--ease)}
+.photo-wall figure:hover img{transform:scale(1.07)}
+.photo-wall figcaption{position:absolute;inset:auto 0 0 0;padding:20px 10px 8px;background:linear-gradient(transparent,rgba(42,36,39,.7));color:#fff;font-size:.72rem;letter-spacing:.06em;opacity:0;transition:opacity .4s}
+.photo-wall figure:hover figcaption{opacity:1}
+.drop{border:1px dashed var(--rose);padding:22px;text-align:center;cursor:pointer;color:var(--muted);transition:background .4s}
+.drop:hover,.drop.over{background:var(--rose-2)}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+.drop img{max-height:140px;margin:10px auto 0}
+.hp{position:absolute;left:-9999px}
+@media (max-width:760px){.wishes{grid-template-columns:1fr}}
+
 /* music */
 .music{display:grid;grid-template-columns:auto 1fr;gap:46px;align-items:center}
 .disc{width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,var(--paper) 0 13%,var(--ink) 14% 15%,#2f292c 16% 100%);position:relative;box-shadow:0 26px 60px rgba(42,36,39,.25);animation:spin 6s linear infinite;animation-play-state:paused}
@@ -272,6 +293,7 @@ footer p{letter-spacing:.34em;text-transform:uppercase;font-size:.74rem;color:#c
       <li><a href="#day">The day</a></li>
       <li><a href="#gallery">Gallery</a></li>
       <li><a href="#rsvp">RSVP</a></li>
+      <li><a href="#wishes">Wishes</a></li>
       <li><a href="#music">Music</a></li>
       <li><a href="#travel">Travel</a></li>
     </ul>
@@ -362,7 +384,7 @@ footer p{letter-spacing:.34em;text-transform:uppercase;font-size:.74rem;color:#c
     <div class="reveal">
       <p class="eyebrow">Kindly reply</p>
       <h2>Will you <em>join us?</em></h2>
-      <p class="lede">Your reply helps us plan seating and souvenirs. Fill in your details and tap <b style="font-weight:500">Send RSVP</b>. Your reply opens in WhatsApp, ready to send to us.</p>
+      <p class="lede">Your reply helps us plan seating and souvenirs. Fill in your details and tap <b style="font-weight:500">Send RSVP</b>.</p>
     </div>
     <div class="reveal r2">
       <form id="rsvp-form" novalidate>
@@ -377,15 +399,50 @@ footer p{letter-spacing:.34em;text-transform:uppercase;font-size:.74rem;color:#c
           <div class="field fixed"><select id="r-side" name="side"><option>Bride's family</option><option>Groom's family</option><option>Friend of the couple</option></select><label for="r-side">Celebrating with</label></div>
         </div>
         <div class="field"><textarea id="r-note" name="note" placeholder=" "></textarea><label for="r-note">A note or song request</label></div>
-        <div><button class="btn" type="submit"><span>Send RSVP</span></button></div>
+        <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div><button class="btn" type="submit" id="r-submit"><span>Send RSVP</span></button></div>
         <p class="status" id="r-status" role="status"></p>
       </form>
       <div class="thanks" id="thanks">
         <p class="eyebrow">Thank you</p>
         <h3>See you on the fifth.</h3>
-        <p class="lede">WhatsApp should have opened with your reply. If it didn't, <a id="thanks-link" href="#" target="_blank" rel="noopener">tap here to send it</a>.</p>
+        <p class="lede">Your reply is saved. Want to message us too? <a id="thanks-link" href="#" target="_blank" rel="noopener">Send it on WhatsApp</a>.</p>
         <button class="btn ghost" type="button" id="again"><span>Reply for someone else</span></button>
       </div>
+    </div>
+  </div>
+</section>
+
+<section id="wishes">
+  <div class="wrap wishes">
+    <div class="reveal">
+      <p class="eyebrow">Guestbook</p>
+      <h2>Leave us <em>a wish</em></h2>
+      <p class="lede">Words of love, prayers or advice for the road ahead. Messages appear here once we've read them.</p>
+      <div class="wall" id="wall" aria-live="polite"><p class="empty">Loading wishes…</p></div>
+      <form class="mini-form" id="wish-form" novalidate>
+        <div class="field"><input id="w-name" name="name" placeholder=" " maxlength="60"><label for="w-name">Your name</label></div>
+        <div class="field"><textarea id="w-body" name="body" placeholder=" " maxlength="600"></textarea><label for="w-body">Your message</label></div>
+        <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div><button class="btn" type="submit"><span>Post wish</span></button></div>
+        <p class="status" id="w-status" role="status"></p>
+      </form>
+    </div>
+    <div class="reveal r2">
+      <p class="eyebrow">Shared moments</p>
+      <h2>Your <em>photos</em></h2>
+      <p class="lede">Snapped something lovely? Share it with us. Photos go up once we've approved them.</p>
+      <div class="photo-wall" id="pwall"><p class="empty">Loading photos…</p></div>
+      <form class="mini-form" id="photo-form" novalidate>
+        <label class="drop" id="drop" for="p-file"><span id="drop-text">Tap to choose a photo, or drop it here</span><input type="file" id="p-file" accept="image/*"><img id="p-prev" alt="" hidden></label>
+        <div class="two">
+          <div class="field"><input id="p-name" name="name" placeholder=" " maxlength="60"><label for="p-name">Your name</label></div>
+          <div class="field"><input id="p-cap" name="caption" placeholder=" " maxlength="200"><label for="p-cap">Caption (optional)</label></div>
+        </div>
+        <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div><button class="btn" type="submit" id="p-submit"><span>Share photo</span></button></div>
+        <p class="status" id="p-status" role="status"></p>
+      </form>
     </div>
   </div>
 </section>
@@ -520,22 +577,96 @@ addEventListener("keydown",e=>{ if(!lb.classList.contains("open")) return; if(e.
 })();
 
 
+/* ---------- API helper ---------- */
+async function api(path, body){
+  const r = await fetch(path, body ? {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(body)} : {});
+  const d = await r.json().catch(()=>({}));
+  if (!r.ok) throw new Error(d.error || "Something went wrong. Please try again.");
+  return d;
+}
+const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
 /* ---------- RSVP ---------- */
-let db=null,user=null;
 const form=document.getElementById("rsvp-form"), statusEl=document.getElementById("r-status"), thanks=document.getElementById("thanks");
 const waLink=t=>COUPLE_WHATSAPP?`https://wa.me/${COUPLE_WHATSAPP}?text=${encodeURIComponent(t)}`:`https://wa.me/?text=${encodeURIComponent(t)}`;
 form.addEventListener("submit",async e=>{
   e.preventDefault();
   const d=Object.fromEntries(new FormData(form));
   if(!d.name.trim()){ statusEl.textContent="Please add your name so we know who's replying."; document.getElementById("r-name").focus(); return; }
-  const yes=d.attend==="yes";
-  const msg=`RSVP · Paulla & Kingson · 5 Dec 2026\nName: ${d.name}\nReply: ${yes?"Attending":"Not attending"}${yes?`\nGuests: ${d.count}`:""}\nWith: ${d.side}${d.phone?`\nPhone: ${d.phone}`:""}${d.note?`\nNote: ${d.note}`:""}`;
-  if(db&&user){ try{ const id=await user.id(); await db.doc("rsvps/"+id).set({name:d.name,phone:d.phone||"",attend:d.attend,count:yes?Number(d.count):0,side:d.side,note:d.note||"",at:new Date().toISOString()}); }catch(err){} }
-  const link=waLink(msg); document.getElementById("thanks-link").href=link;
-  const a=document.createElement("a"); a.href=link; a.target="_blank"; a.rel="noopener"; document.body.appendChild(a); a.click(); a.remove();
-  form.style.display="none"; thanks.classList.add("show");
+  const btn=document.getElementById("r-submit"); btn.disabled=true; statusEl.textContent="Sending your reply…";
+  try{
+    await api("/api/rsvp", d);
+    const yes=d.attend==="yes";
+    document.getElementById("thanks-link").href=waLink(`RSVP · Paulla & Kingson · 5 Dec 2026\nName: ${d.name}\nReply: ${yes?"Attending":"Not attending"}${yes?`\nGuests: ${d.count}`:""}`);
+    form.style.display="none"; thanks.classList.add("show"); statusEl.textContent="";
+  }catch(err){ statusEl.textContent=err.message; }
+  finally{ btn.disabled=false; }
 });
 document.getElementById("again").onclick=()=>{ form.reset(); statusEl.textContent=""; thanks.classList.remove("show"); form.style.display=""; document.getElementById("r-name").focus(); };
+
+/* ---------- Guestbook ---------- */
+const wall=document.getElementById("wall");
+async function loadWishes(){
+  try{
+    const {messages}=await api("/api/messages");
+    wall.innerHTML = messages.length ? messages.map((m,i)=>`<article class="wish" style="animation-delay:${Math.min(i,8)*.08}s"><p>“${esc(m.body)}”</p><small>${esc(m.name)}</small></article>`).join("")
+      : '<p class="empty">No wishes yet. Be the first.</p>';
+  }catch(e){ wall.innerHTML='<p class="empty">Wishes will show here soon.</p>'; }
+}
+const wForm=document.getElementById("wish-form"), wStatus=document.getElementById("w-status");
+wForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const d=Object.fromEntries(new FormData(wForm));
+  if(!d.name.trim()||!d.body.trim()){ wStatus.textContent="Please add your name and a message."; return; }
+  wStatus.textContent="Posting…";
+  try{ await api("/api/messages", d); wForm.reset(); wStatus.textContent="Thank you! Your wish will appear once we've read it."; }
+  catch(err){ wStatus.textContent=err.message; }
+});
+
+/* ---------- Guest photos ---------- */
+const pwall=document.getElementById("pwall");
+async function loadPhotos(){
+  try{
+    const {photos}=await api("/api/photos");
+    pwall.innerHTML = photos.length ? photos.map((p,i)=>`<figure style="animation-delay:${Math.min(i,10)*.06}s"><img src="${esc(p.url)}" alt="${esc(p.caption||"Photo shared by "+p.name)}" loading="lazy"><figcaption>${esc(p.caption?p.caption+" · ":"")}${esc(p.name)}</figcaption></figure>`).join("")
+      : '<p class="empty">No photos yet. Share the first one.</p>';
+  }catch(e){ pwall.innerHTML='<p class="empty">Guest photos will show here soon.</p>'; }
+}
+let photoData=null;
+const pFile=document.getElementById("p-file"), pPrev=document.getElementById("p-prev"), drop=document.getElementById("drop");
+function shrink(file){
+  return new Promise((ok,bad)=>{
+    const img=new Image(); img.onload=()=>{
+      const max=1600, k=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement("canvas"); c.width=Math.round(img.width*k); c.height=Math.round(img.height*k);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(img.src); ok(c.toDataURL("image/jpeg",.82));
+    }; img.onerror=()=>bad(new Error("That file isn't a photo we can read. Try a JPG or PNG.")); img.src=URL.createObjectURL(file);
+  });
+}
+async function pick(file){
+  if(!file) return;
+  try{ photoData=await shrink(file); pPrev.src=photoData; pPrev.hidden=false; document.getElementById("drop-text").textContent=file.name; }
+  catch(err){ document.getElementById("p-status").textContent=err.message; }
+}
+pFile.addEventListener("change",()=>pick(pFile.files[0]));
+["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>pick(e.dataTransfer.files[0]));
+const pForm=document.getElementById("photo-form"), pStatus=document.getElementById("p-status");
+pForm.addEventListener("submit",async e=>{
+  e.preventDefault();
+  const d=Object.fromEntries(new FormData(pForm));
+  if(!photoData){ pStatus.textContent="Please choose a photo first."; return; }
+  if(!d.name.trim()){ pStatus.textContent="Please add your name."; return; }
+  const btn=document.getElementById("p-submit"); btn.disabled=true; pStatus.textContent="Uploading…";
+  try{
+    await api("/api/photos",{...d, image:photoData});
+    pForm.reset(); photoData=null; pPrev.hidden=true; document.getElementById("drop-text").textContent="Tap to choose a photo, or drop it here";
+    pStatus.textContent="Thank you! Your photo will appear once we've approved it.";
+  }catch(err){ pStatus.textContent=err.message; }
+  finally{ btn.disabled=false; }
+});
+loadWishes(); loadPhotos();
 
 /* ---------- Song (reads the settings at the top) ---------- */
 const song=document.getElementById("song"), tgl=document.getElementById("yt-toggle");

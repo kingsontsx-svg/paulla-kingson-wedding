@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Wedding Admin · P &amp; K</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;1,6..96,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: a calm back office in the site's white and lilac; summary tiles first, then a review queue. */
+:root{
+  --paper:#ffffff; --soft:#faf7fd; --ink:#2a2427; --muted:#857980; --lilac:#8b6bb5; --lilac-2:#ece3f6; --line:#e6def0;
+  --good:#3f7d5a; --bad:#a3404f; --warn:#b07a1f;
+  --f-display:"Bodoni Moda", Didot, Georgia, serif; --f-body:"Jost", "Helvetica Neue", Arial, sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--soft);color:var(--ink);font:300 16px/1.6 var(--f-body)}
+:focus-visible{outline:1.5px solid var(--lilac);outline-offset:3px}
+h1,h2{font-family:var(--f-display);font-weight:400;margin:0}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+header{background:var(--paper);border-bottom:1px solid var(--line)}
+header .wrap{display:flex;justify-content:space-between;align-items:center;min-height:64px;gap:12px}
+header h1{font-style:italic;font-size:1.5rem}
+.btn{font:500 .7rem/1 var(--f-body);letter-spacing:.2em;text-transform:uppercase;padding:11px 16px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.sm{padding:8px 10px;font-size:.62rem}
+.btn.ok{background:var(--good);border-color:var(--good)}
+.btn.no{background:transparent;color:var(--bad);border-color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:wait}
+/* login */
+#login{min-height:100vh;display:grid;place-items:center;padding:20px}
+#login form{background:var(--paper);border:1px solid var(--line);padding:36px;width:min(380px,100%);display:grid;gap:18px}
+#login h2{font-size:2rem}
+label{display:grid;gap:6px;font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+input{font:400 1rem var(--f-body);padding:12px;border:1px solid var(--line);color:var(--ink);background:var(--soft)}
+.err{color:var(--bad);min-height:1.4em;margin:0;font-size:.92rem}
+/* dashboard */
+#app{display:none}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:28px 0}
+.tile{background:var(--paper);border:1px solid var(--line);padding:18px}
+.tile b{display:block;font:400 2.4rem/1 var(--f-display);font-variant-numeric:tabular-nums}
+.tile span{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+.tile.alert{border-color:var(--lilac);background:var(--lilac-2)}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabs button{background:none;border:0;padding:12px 16px;font:500 .74rem var(--f-body);letter-spacing:.18em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-color:var(--lilac)}
+.count{display:inline-block;min-width:20px;padding:1px 6px;border-radius:999px;background:var(--lilac);color:#fff;font-size:.66rem;margin-left:6px;letter-spacing:0}
+.panel{display:none;padding:22px 0 60px}.panel.on{display:block}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.toolbar input{min-width:240px}
+.tablewrap{overflow-x:auto;background:var(--paper);border:1px solid var(--line)}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--soft)}
+.pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:.66rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.pill.approved,.pill.yes{background:#e3f1e8;color:var(--good)}
+.pill.rejected,.pill.no{background:#f6e3e6;color:var(--bad)}
+.pill.pending{background:#fbf0dc;color:var(--warn)}
+.items{display:grid;gap:12px}
+.item{background:var(--paper);border:1px solid var(--line);padding:16px;display:grid;grid-template-columns:auto 1fr auto;gap:16px;align-items:center}
+.item.pending{border-left:3px solid var(--warn)}
+.item img{width:110px;height:110px;object-fit:cover;display:block}
+.item p{margin:0 0 6px;font-family:var(--f-display);font-size:1.08rem;font-style:italic}
+.item small{color:var(--muted)}
+.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.muted{color:var(--muted)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;font-size:.9rem;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+@media (max-width:640px){.item{grid-template-columns:1fr}.acts{justify-content:flex-start}.item img{width:100%;height:220px}}
+</style>
+</head>
+<body>
+
+<section id="login">
+  <form id="login-form">
+    <h2>Admin sign in</h2>
+    <p class="muted" style="margin:0">Paulla &amp; Kingson's wedding</p>
+    <label for="pw">Password<input id="pw" type="password" autocomplete="current-password" required></label>
+    <p class="err" id="login-err" role="alert"></p>
+    <button class="btn" type="submit" id="login-btn">Sign in</button>
+  </form>
+</section>
+
+<div id="app">
+  <header><div class="wrap"><h1>P &amp; K · Admin</h1><div style="display:flex;gap:8px"><a class="btn ghost" href="/" target="_blank" rel="noopener">View site</a><button class="btn ghost" id="logout">Sign out</button></div></div></header>
+  <main class="wrap">
+    <div class="tiles" id="tiles"></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="rsvps">RSVPs</button>
+      <button role="tab" aria-selected="false" data-tab="messages">Wishes <span class="count" id="c-msg" hidden></span></button>
+      <button role="tab" aria-selected="false" data-tab="photos">Photos <span class="count" id="c-pho" hidden></span></button>
+    </div>
+    <section class="panel on" id="p-rsvps">
+      <div class="toolbar"><input id="q" type="search" placeholder="Search by name or phone" aria-label="Search RSVPs"><a class="btn" href="/api/admin/export">Export CSV</a></div>
+      <div class="tablewrap"><table><thead><tr><th>Name</th><th>Reply</th><th>Guests</th><th>Phone</th><th>With</th><th>Note</th><th>When</th><th></th></tr></thead><tbody id="rsvp-rows"></tbody></table></div>
+    </section>
+    <section class="panel" id="p-messages"><div class="items" id="msg-list"></div></section>
+    <section class="panel" id="p-photos"><div class="items" id="photo-list"></div></section>
+  </main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = t => String(t ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const when = d => new Date(d).toLocaleString("en-GB",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+let DATA = {rsvps:[],messages:[],photos:[]};
+
+function toast(t){ const el=$("toast"); el.textContent=t; el.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>el.classList.remove("show"),2200); }
+async function call(path, opts={}){
+  const r = await fetch(path, {credentials:"same-origin", ...opts, headers:{"Content-Type":"application/json"}});
+  const d = await r.json().catch(()=>({}));
+  if (r.status===401 && path!=="/api/admin/login") { showLogin(); throw new Error("Please sign in again."); }
+  if (!r.ok) throw new Error(d.error || "Something went wrong.");
+  return d;
+}
+function showLogin(){ $("app").style.display="none"; $("login").style.display="grid"; $("pw").focus(); }
+function showApp(){ $("login").style.display="none"; $("app").style.display="block"; load(); }
+
+$("login-form").addEventListener("submit", async e=>{
+  e.preventDefault(); $("login-err").textContent=""; $("login-btn").disabled=true;
+  try{ await call("/api/admin/login",{method:"POST",body:JSON.stringify({password:$("pw").value})}); $("pw").value=""; showApp(); }
+  catch(err){ $("login-err").textContent=err.message; }
+  finally{ $("login-btn").disabled=false; }
+});
+$("logout").onclick = async ()=>{ await call("/api/admin/login",{method:"DELETE"}).catch(()=>{}); showLogin(); };
+
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected", x===b));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on", p.id==="p-"+b.dataset.tab));
+});
+
+async function load(){
+  try{ DATA = await call("/api/admin/data"); render(); }
+  catch(err){ toast(err.message); }
+}
+function render(){
+  const r=DATA.rsvps, yes=r.filter(x=>x.attending), heads=yes.reduce((s,x)=>s+(x.guests||1),0);
+  const pm=DATA.messages.filter(x=>x.status==="pending").length, pp=DATA.photos.filter(x=>x.status==="pending").length;
+  $("tiles").innerHTML = `
+    <div class="tile"><b>${heads}</b><span>Guests coming</span></div>
+    <div class="tile"><b>${yes.length}</b><span>Yes replies</span></div>
+    <div class="tile"><b>${r.length-yes.length}</b><span>Declined</span></div>
+    <div class="tile ${pm+pp?"alert":""}"><b>${pm+pp}</b><span>Waiting for approval</span></div>`;
+  $("c-msg").hidden=!pm; $("c-msg").textContent=pm; $("c-pho").hidden=!pp; $("c-pho").textContent=pp;
+  renderRsvps();
+  $("msg-list").innerHTML = DATA.messages.length ? DATA.messages.map(m=>`
+    <div class="item ${m.status}"><span class="pill ${m.status}">${m.status}</span>
+      <div><p>“${esc(m.body)}”</p><small>${esc(m.name)} · ${when(m.created_at)}</small></div>
+      <div class="acts">${acts("message",m)}</div></div>`).join("") : '<p class="muted">No wishes yet.</p>';
+  $("photo-list").innerHTML = DATA.photos.length ? DATA.photos.map(p=>`
+    <div class="item ${p.status}"><a href="${esc(p.url)}" target="_blank" rel="noopener"><img src="${esc(p.url)}" alt="${esc(p.caption||"Guest photo")}"></a>
+      <div><span class="pill ${p.status}">${p.status}</span><p>${esc(p.caption||"No caption")}</p><small>${esc(p.name)} · ${when(p.created_at)}</small></div>
+      <div class="acts">${acts("photo",p)}</div></div>`).join("") : '<p class="muted">No photos yet.</p>';
+}
+function acts(type,x){
+  const b=[];
+  if(x.status!=="approved") b.push(`<button class="btn sm ok" data-act="approve" data-type="${type}" data-id="${x.id}">Approve</button>`);
+  if(x.status!=="rejected") b.push(`<button class="btn sm no" data-act="reject" data-type="${type}" data-id="${x.id}">${x.status==="approved"?"Hide":"Reject"}</button>`);
+  b.push(`<button class="btn sm ghost" data-act="delete" data-type="${type}" data-id="${x.id}">Delete</button>`);
+  return b.join("");
+}
+function renderRsvps(){
+  const q=$("q").value.trim().toLowerCase();
+  const rows=DATA.rsvps.filter(x=>!q || (x.name+" "+(x.phone||"")).toLowerCase().includes(q));
+  $("rsvp-rows").innerHTML = rows.length ? rows.map(x=>`<tr>
+    <td>${esc(x.name)}</td><td><span class="pill ${x.attending?"yes":"no"}">${x.attending?"Coming":"Declined"}</span></td>
+    <td>${x.attending?x.guests:"–"}</td><td>${esc(x.phone)}</td><td>${esc(x.side)}</td><td>${esc(x.note)}</td>
+    <td class="muted">${when(x.created_at)}</td>
+    <td><button class="btn sm ghost" data-act="delete" data-type="rsvp" data-id="${x.id}">Delete</button></td></tr>`).join("")
+    : `<tr><td colspan="8" class="muted">${DATA.rsvps.length?"No matches.":"No RSVPs yet."}</td></tr>`;
+}
+$("q").addEventListener("input", renderRsvps);
+
+let confirmTimer=null;
+document.addEventListener("click", async e=>{
+  const b=e.target.closest("button[data-act]"); if(!b) return;
+  const {act,type,id}=b.dataset;
+  if(act==="delete" && b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Tap again to delete"; clearTimeout(confirmTimer); confirmTimer=setTimeout(()=>{b.dataset.armed="";b.textContent="Delete";},3000); return; }
+  b.disabled=true;
+  try{ await call("/api/admin/moderate",{method:"POST",body:JSON.stringify({type,id,action:act})}); toast(act==="approve"?"Approved. It's now on the site.":act==="reject"?"Hidden from the site.":"Deleted."); await load(); }
+  catch(err){ toast(err.message); b.disabled=false; }
+});
+
+fetch("/api/admin/login",{credentials:"same-origin"}).then(r=>r.json()).then(d=> d.admin ? showApp() : showLogin()).catch(showLogin);
+</script>
+</body>
+</html>
