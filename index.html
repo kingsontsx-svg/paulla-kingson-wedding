@@ -203,12 +203,14 @@ form{display:grid;gap:26px}
 .spot{position:fixed;left:18px;bottom:18px;z-index:70;width:min(320px,calc(100vw - 36px));border-radius:14px;overflow:hidden;box-shadow:0 14px 36px rgba(42,36,39,.18);opacity:0;transform:translateY(20px);transition:all .9s var(--ease)}
 body.ready .spot{opacity:1;transform:none}
 .spot{display:flex;align-items:center;gap:12px;background:var(--paper);border:1px solid var(--line);padding:8px 12px 8px 8px;width:auto;max-width:calc(100vw - 36px)}
-.spot .yt{width:200px;height:113px;border-radius:8px;overflow:hidden;flex:none;background:#000}
+.spot .yt{width:52px;height:52px;border-radius:50%;flex:none;background:var(--gold-grad);background-size:200% 100%;animation:sheen 4s linear infinite;position:relative}
+.spot .yt::after{content:"";position:absolute;inset:40%;border-radius:50%;background:var(--paper)}
+.playing .spot .yt{animation:sheen 4s linear infinite,spin 4s linear infinite}
 .spot .yt iframe{width:100%;height:100%;border:0;display:block}
 .spot-meta strong{display:block;font:400 1.05rem/1.2 var(--f-display)}
 .spot-meta small{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--rose)}
 #yt-toggle{width:42px;height:42px;border-radius:50%;border:0;background:var(--ink);color:#fff;cursor:pointer;flex:none}
-@media (max-width:480px){.spot .yt{width:120px;height:68px}}
+
 .player{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;align-items:center;gap:12px;background:var(--white);border:1px solid var(--line);border-radius:999px;padding:6px 16px 6px 6px;box-shadow:0 14px 36px rgba(42,36,39,.14);animation:rise 1s var(--ease) 2.4s both}
 .player button{width:44px;height:44px;border-radius:50%;border:0;background:var(--ink);color:var(--white);cursor:pointer;font-size:.9rem;position:relative}
 .playing .player button::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px solid var(--rose);animation:pulse 1.6s ease-out infinite}
@@ -393,14 +395,10 @@ footer p{letter-spacing:.34em;text-transform:uppercase;font-size:.74rem;color:#c
     <div class="disc" id="disc"></div>
     <div>
       <p class="eyebrow">Our song</p>
-      <h2>Already <em>Falling</em></h2>
-      <p class="lede">Davido · from the album <i>Oriadé</i>. The song we're walking into our forever with. Tap below to listen.</p>
-      <div class="cta">
-        <a class="btn" href="https://www.youtube.com/watch?v=3-MyZbca1Qc" target="_blank" rel="noopener"><span>Watch on YouTube</span></a>
-        <a class="btn ghost" href="https://music.apple.com/us/album/6784220944" target="_blank" rel="noopener"><span>Apple Music</span></a>
-        <a class="btn ghost" href="https://open.spotify.com/search/Davido%20Already%20Falling" target="_blank" rel="noopener"><span>Spotify</span></a>
-      </div>
-      <p class="lede" style="font-size:.9rem;margin-top:22px">It starts when you open the invitation. It plays on repeat; use the player in the corner to pause it.</p>
+      <h2 id="music-title">Our <em>Theme</em></h2>
+      <p class="lede" id="music-artist">Paulla &amp; Kingson</p>
+      <p class="lede">It starts when you open the invitation and plays on repeat. Use the player in the corner to pause it.</p>
+      <div class="cta" id="listen-wrap" hidden><a class="btn ghost" id="listen-link" href="#" target="_blank" rel="noopener"><span>Listen to the full song</span></a></div>
     </div>
   </div>
 </section>
@@ -421,9 +419,9 @@ footer p{letter-spacing:.34em;text-transform:uppercase;font-size:.74rem;color:#c
   <p>05 · 12 · 2026 — Port Harcourt</p>
 </footer>
 
-<div class="spot" id="spot" aria-label="Now playing: Already Falling by Davido">
-  <div class="yt"><div id="yt-player"></div></div>
-  <div class="spot-meta"><strong>Already Falling</strong><small>Davido</small></div>
+<div class="spot" id="spot" aria-label="Now playing">
+  <audio id="song" loop preload="auto"></audio><div class="yt" aria-hidden="true"></div>
+  <div class="spot-meta"><strong id="song-title">Our Theme</strong><small id="song-artist">Paulla &amp; Kingson</small></div>
   <button id="yt-toggle" type="button" aria-label="Pause the song">❚❚</button>
 </div>
 
@@ -435,7 +433,11 @@ footer p{letter-spacing:.34em;text-transform:uppercase;font-size:.74rem;color:#c
 </div>
 
 <script>
-/* ---------- Settings ---------- */
+/* ---------- Settings: change these to whatever you like ---------- */
+const SONG_FILE   = "song.mp3";          // the audio file in this repo that plays on the site
+const SONG_TITLE  = "Our Theme";         // shown in the corner player and the music section
+const SONG_ARTIST = "Paulla & Kingson";  // shown under the title
+const LISTEN_URL  = "";                  // optional: a YouTube/Spotify link for a "Listen" button
 const COUPLE_WHATSAPP = "";   // e.g. "2348031234567" (country code, no +)
 const PLAYLIST_URL = "";      // Spotify or YouTube playlist link
 const WEDDING = new Date("2026-12-05T10:00:00+01:00");
@@ -451,7 +453,7 @@ document.getElementById("open-inv").addEventListener("click",()=>{ playSong(); i
 
 /* ---------- Marquee ---------- */
 const mq = document.getElementById("marq");
-const words = ["Paulla & Kingson","Saturday, 5 December 2026","Port Harcourt","Already falling","With love"];
+const words = ["Paulla & Kingson","Saturday, 5 December 2026","Port Harcourt","With love","Forever begins"];
 mq.innerHTML = [...words, ...words, ...words, ...words].map(w=>`<span>${w}</span>`).join("");
 
 /* ---------- Countdown (flip on change) ---------- */
@@ -535,22 +537,19 @@ form.addEventListener("submit",async e=>{
 });
 document.getElementById("again").onclick=()=>{ form.reset(); statusEl.textContent=""; thanks.classList.remove("show"); form.style.display=""; document.getElementById("r-name").focus(); };
 
-/* ---------- YouTube: Already Falling (loops nonstop) ---------- */
-const SONG_IDS=["BNWjtQMT0m8","3-MyZbca1Qc"]; // official audio, then official video as backup
-let yt=null, ytReady=false, wantPlay=false, idIdx=0;
-const tgl=document.getElementById("yt-toggle");
-function setBtn(playing){ tgl.textContent=playing?"❚❚":"▶"; tgl.setAttribute("aria-label",playing?"Pause the song":"Play the song"); document.body.classList.toggle("playing",playing); }
-window.onYouTubeIframeAPIReady=()=>{
-  yt=new YT.Player("yt-player",{videoId:SONG_IDS[0],playerVars:{playsinline:1,rel:0,controls:0,modestbranding:1,loop:1,playlist:SONG_IDS[0]},
-    events:{
-      onReady:()=>{ ytReady=true; if(wantPlay){ yt.unMute(); yt.setVolume(80); yt.playVideo(); } },
-      onStateChange:e=>{ if(e.data===YT.PlayerState.ENDED){ yt.seekTo(0); yt.playVideo(); } setBtn(e.data===YT.PlayerState.PLAYING||e.data===YT.PlayerState.BUFFERING); },
-      onError:()=>{ if(idIdx<SONG_IDS.length-1){ idIdx++; yt.loadVideoById(SONG_IDS[idIdx]); } }
-    }});
-};
-function playSong(){ wantPlay=true; if(ytReady){ yt.unMute(); yt.setVolume(80); yt.playVideo(); } }
-tgl.addEventListener("click",()=>{ if(!ytReady) return playSong(); const st=yt.getPlayerState(); if(st===YT.PlayerState.PLAYING) yt.pauseVideo(); else yt.playVideo(); });
+/* ---------- Song (reads the settings at the top) ---------- */
+const song=document.getElementById("song"), tgl=document.getElementById("yt-toggle");
+song.src=SONG_FILE;
+document.getElementById("song-title").textContent=SONG_TITLE;
+document.getElementById("song-artist").textContent=SONG_ARTIST;
+document.getElementById("music-title").textContent=SONG_TITLE;
+document.getElementById("music-artist").textContent=SONG_ARTIST;
+if(LISTEN_URL){ document.getElementById("listen-link").href=LISTEN_URL; document.getElementById("listen-wrap").hidden=false; }
+function setBtn(p){ tgl.textContent=p?"❚❚":"▶"; tgl.setAttribute("aria-label",p?"Pause the song":"Play the song"); document.body.classList.toggle("playing",p); }
+song.addEventListener("play",()=>setBtn(true)); song.addEventListener("pause",()=>setBtn(false));
+function playSong(){ song.volume=.85; song.play().catch(()=>setBtn(false)); }
+tgl.addEventListener("click",()=>{ song.paused?playSong():song.pause(); });
 </script>
-<script src="https://www.youtube.com/iframe_api" async></script>
+
 </body>
 </html>
