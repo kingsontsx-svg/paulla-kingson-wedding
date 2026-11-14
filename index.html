@@ -202,7 +202,13 @@ form{display:grid;gap:26px}
 @media (max-width:760px){.music{grid-template-columns:1fr}.disc{width:170px;height:170px}}
 .spot{position:fixed;left:18px;bottom:18px;z-index:70;width:min(320px,calc(100vw - 36px));border-radius:14px;overflow:hidden;box-shadow:0 14px 36px rgba(42,36,39,.18);opacity:0;transform:translateY(20px);transition:all .9s var(--ease)}
 body.ready .spot{opacity:1;transform:none}
-.spot iframe{display:block;border:0}
+.spot{display:flex;align-items:center;gap:12px;background:var(--paper);border:1px solid var(--line);padding:8px 12px 8px 8px;width:auto;max-width:calc(100vw - 36px)}
+.spot .yt{width:200px;height:113px;border-radius:8px;overflow:hidden;flex:none;background:#000}
+.spot .yt iframe{width:100%;height:100%;border:0;display:block}
+.spot-meta strong{display:block;font:400 1.05rem/1.2 var(--f-display)}
+.spot-meta small{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--rose)}
+#yt-toggle{width:42px;height:42px;border-radius:50%;border:0;background:var(--ink);color:#fff;cursor:pointer;flex:none}
+@media (max-width:480px){.spot .yt{width:120px;height:68px}}
 .player{position:fixed;right:18px;bottom:18px;z-index:70;display:flex;align-items:center;gap:12px;background:var(--white);border:1px solid var(--line);border-radius:999px;padding:6px 16px 6px 6px;box-shadow:0 14px 36px rgba(42,36,39,.14);animation:rise 1s var(--ease) 2.4s both}
 .player button{width:44px;height:44px;border-radius:50%;border:0;background:var(--ink);color:var(--white);cursor:pointer;font-size:.9rem;position:relative}
 .playing .player button::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:1px solid var(--rose);animation:pulse 1.6s ease-out infinite}
@@ -390,11 +396,11 @@ footer p{letter-spacing:.34em;text-transform:uppercase;font-size:.74rem;color:#c
       <h2>Already <em>Falling</em></h2>
       <p class="lede">Davido · from the album <i>Oriadé</i>. The song we're walking into our forever with. Tap below to listen.</p>
       <div class="cta">
-        <a class="btn" href="https://www.youtube.com/results?search_query=Davido+Already+Falling+official+video" target="_blank" rel="noopener"><span>Watch on YouTube</span></a>
+        <a class="btn" href="https://www.youtube.com/watch?v=3-MyZbca1Qc" target="_blank" rel="noopener"><span>Watch on YouTube</span></a>
         <a class="btn ghost" href="https://music.apple.com/us/album/6784220944" target="_blank" rel="noopener"><span>Apple Music</span></a>
         <a class="btn ghost" href="https://open.spotify.com/search/Davido%20Already%20Falling" target="_blank" rel="noopener"><span>Spotify</span></a>
       </div>
-      <p class="lede" style="font-size:.9rem;margin-top:22px">It starts when you open the invitation. Use the player in the corner to pause or replay it.</p>
+      <p class="lede" style="font-size:.9rem;margin-top:22px">It starts when you open the invitation. It plays on repeat; use the player in the corner to pause it.</p>
     </div>
   </div>
 </section>
@@ -415,7 +421,11 @@ footer p{letter-spacing:.34em;text-transform:uppercase;font-size:.74rem;color:#c
   <p>05 · 12 · 2026 — Port Harcourt</p>
 </footer>
 
-<div class="spot" id="spot" aria-label="Now playing: Already Falling by Davido"><div id="spotify-embed"></div></div>
+<div class="spot" id="spot" aria-label="Now playing: Already Falling by Davido">
+  <div class="yt"><div id="yt-player"></div></div>
+  <div class="spot-meta"><strong>Already Falling</strong><small>Davido</small></div>
+  <button id="yt-toggle" type="button" aria-label="Pause the song">❚❚</button>
+</div>
 
 <div class="lightbox" id="lb" role="dialog" aria-modal="true" aria-label="Photo viewer">
   <button class="lb-btn" id="lb-close" aria-label="Close">✕</button>
@@ -525,15 +535,22 @@ form.addEventListener("submit",async e=>{
 });
 document.getElementById("again").onclick=()=>{ form.reset(); statusEl.textContent=""; thanks.classList.remove("show"); form.style.display=""; document.getElementById("r-name").focus(); };
 
-/* ---------- Spotify: Already Falling ---------- */
-let spotCtl=null, wantPlay=false;
-window.onSpotifyIframeApiReady = (IFrameAPI)=>{
-  IFrameAPI.createController(document.getElementById("spotify-embed"),
-    {uri:"spotify:track:3ozNRKWMwoVDoFSsamwJ5e", width:"100%", height:80},
-    (ctl)=>{ spotCtl=ctl; ctl.addListener("ready",()=>{ if(wantPlay) ctl.play(); }); });
+/* ---------- YouTube: Already Falling (loops nonstop) ---------- */
+const SONG_IDS=["BNWjtQMT0m8","3-MyZbca1Qc"]; // official audio, then official video as backup
+let yt=null, ytReady=false, wantPlay=false, idIdx=0;
+const tgl=document.getElementById("yt-toggle");
+function setBtn(playing){ tgl.textContent=playing?"❚❚":"▶"; tgl.setAttribute("aria-label",playing?"Pause the song":"Play the song"); document.body.classList.toggle("playing",playing); }
+window.onYouTubeIframeAPIReady=()=>{
+  yt=new YT.Player("yt-player",{videoId:SONG_IDS[0],playerVars:{playsinline:1,rel:0,controls:0,modestbranding:1,loop:1,playlist:SONG_IDS[0]},
+    events:{
+      onReady:()=>{ ytReady=true; if(wantPlay){ yt.unMute(); yt.setVolume(80); yt.playVideo(); } },
+      onStateChange:e=>{ if(e.data===YT.PlayerState.ENDED){ yt.seekTo(0); yt.playVideo(); } setBtn(e.data===YT.PlayerState.PLAYING||e.data===YT.PlayerState.BUFFERING); },
+      onError:()=>{ if(idIdx<SONG_IDS.length-1){ idIdx++; yt.loadVideoById(SONG_IDS[idIdx]); } }
+    }});
 };
-function playSong(){ wantPlay=true; try{ if(spotCtl) spotCtl.play(); }catch(e){} }
+function playSong(){ wantPlay=true; if(ytReady){ yt.unMute(); yt.setVolume(80); yt.playVideo(); } }
+tgl.addEventListener("click",()=>{ if(!ytReady) return playSong(); const st=yt.getPlayerState(); if(st===YT.PlayerState.PLAYING) yt.pauseVideo(); else yt.playVideo(); });
 </script>
-<script src="https://open.spotify.com/embed/iframe-api/v1" async></script>
+<script src="https://www.youtube.com/iframe_api" async></script>
 </body>
 </html>
