@@ -530,12 +530,12 @@ body.playing .player .eq i:nth-child(2){animation-delay:.2s}body.playing .player
       <p class="mono slate"><b>Scene 05</b> Gifts</p>
       <h2 class="h-l" style="margin-top:22px">With <em>gratitude</em></h2>
       <p class="lede" style="margin-top:22px" data-f="cash_note">Your presence is the greatest gift.</p>
-      <div class="tabs" role="tablist">
+      <div class="tabs" role="tablist" hidden>
         <button role="tab" aria-selected="true" aria-controls="t-cash" id="tab-cash">Cash gift</button>
         <button role="tab" aria-selected="false" aria-controls="t-wish" id="tab-wish">Wishlist</button>
         <button role="tab" aria-selected="false" aria-controls="t-fund" id="tab-fund">Honeymoon fund</button>
       </div>
-      <div class="tabpanel on" id="t-cash" role="tabpanel" aria-labelledby="tab-cash">
+      <div class="tabpanel on" id="t-cash" style="margin-top:44px" role="tabpanel" aria-labelledby="tab-cash">
         <div class="bank">
           <div class="top mono"><span data-f="cash_title">Cash gift</span><span class="mono-m">P&amp;K</span></div>
           <pre id="cash-details"></pre>
@@ -545,10 +545,10 @@ body.playing .player .eq i:nth-child(2){animation-delay:.2s}body.playing .player
           </div>
         </div>
       </div>
-      <div class="tabpanel" id="t-wish" role="tabpanel" aria-labelledby="tab-wish">
+      <div class="tabpanel" hidden id="t-wish" role="tabpanel" aria-labelledby="tab-wish">
         <div class="gift-grid" id="gift-grid"></div>
       </div>
-      <div class="tabpanel" id="t-fund" role="tabpanel" aria-labelledby="tab-fund">
+      <div class="tabpanel" hidden id="t-fund" role="tabpanel" aria-labelledby="tab-fund">
         <div class="fund">
           <div>
             <p class="mono" style="color:var(--mute-d)">Raised so far</p>
@@ -910,7 +910,7 @@ $("#photo-form").addEventListener("submit", async e=>{
 function renderCredits(){
   const d=weddingDate().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric",timeZone:"Africa/Lagos"});
   const items=[["Starring",`${S.bride} & ${S.groom}`],["With",S.families],["Original score",`${S.song_title} · ${S.song_artist}`],["Filmed in",S.city],["Premiere",d],["And introducing","You, our favourite people"]];
-  $("#roll").innerHTML = items.filter(i=>i[1]).map(([a,b])=>`<div><span class="mono">${esc(a)}</span><b>${esc(b)}</b></div>`).join("") + `<div><b class="fin"></b><span class="mono">See you on the day</span></div>`;
+  $("#roll").innerHTML = items.filter(i=>i[1]).map(([a,b])=>`<div><span class="mono">${esc(a)}</span><b>${esc(b)}</b></div>`).join("") + `<div><b class="fin">Fin.</b><span class="mono">See you on the day</span></div>`;
 }
 
 /* ---------------- music ---------------- */
