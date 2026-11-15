@@ -910,7 +910,7 @@ $("#photo-form").addEventListener("submit", async e=>{
 function renderCredits(){
   const d=weddingDate().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric",timeZone:"Africa/Lagos"});
   const items=[["Starring",`${S.bride} & ${S.groom}`],["With",S.families],["Original score",`${S.song_title} · ${S.song_artist}`],["Filmed in",S.city],["Premiere",d],["And introducing","You, our favourite people"]];
-  $("#roll").innerHTML = items.filter(i=>i[1]).map(([a,b])=>`<div><span class="mono">${esc(a)}</span><b>${esc(b)}</b></div>`).join("") + `<div><b class="fin">Fin.</b><span class="mono">See you on the day</span></div>`;
+  $("#roll").innerHTML = items.filter(i=>i[1]).map(([a,b])=>`<div><span class="mono">${esc(a)}</span><b>${esc(b)}</b></div>`).join("") + `<div><b class="fin"></b><span class="mono">See you on the day</span></div>`;
 }
 
 /* ---------------- music ---------------- */
