@@ -319,7 +319,6 @@ body.locked{overflow:hidden}
 /* ---------- credits ---------- */
 .credits{position:relative;height:100svh;min-height:620px;overflow:hidden;text-align:center;background:var(--black)}
 .credits .roll{position:absolute;left:0;right:0;top:100%;display:grid;gap:56px;padding:0 var(--pad);animation:roll 38s linear infinite}
-.credits:hover .roll{animation-play-state:paused}
 @keyframes roll{to{transform:translateY(calc(-100% - 100svh))}}
 .credits .roll div{display:grid;gap:8px}
 .credits .roll span{color:var(--mute-d)}
@@ -623,7 +622,7 @@ body.playing .player .eq i:nth-child(2){animation-delay:.2s}body.playing .player
 
 <!-- player -->
 <div class="player" id="player">
-  <button type="button" id="play" aria-label="Pause music">❚❚</button>
+  <button type="button" id="play" aria-label="Pause music"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="3" y="2" width="2.4" height="10" rx="1" fill="currentColor"/><rect x="8.6" y="2" width="2.4" height="10" rx="1" fill="currentColor"/></svg></button>
   <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <div class="t"><b id="pl-title">Our Theme</b><span class="mono" id="pl-artist">Paulla &amp; Kingson</span></div>
 </div>
@@ -910,12 +909,12 @@ $("#photo-form").addEventListener("submit", async e=>{
 function renderCredits(){
   const d=weddingDate().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric",timeZone:"Africa/Lagos"});
   const items=[["Starring",`${S.bride} & ${S.groom}`],["With",S.families],["Original score",`${S.song_title} · ${S.song_artist}`],["Filmed in",S.city],["Premiere",d],["And introducing","You, our favourite people"]];
-  $("#roll").innerHTML = items.filter(i=>i[1]).map(([a,b])=>`<div><span class="mono">${esc(a)}</span><b>${esc(b)}</b></div>`).join("") + `<div><b class="fin">Fin.</b><span class="mono">See you on the day</span></div>`;
+  $("#roll").innerHTML = items.filter(i=>i[1]).map(([a,b])=>`<div><span class="mono">${esc(a)}</span><b>${esc(b)}</b></div>`).join("") + `<div><b class="fin">Forever.</b><span class="mono">See you on the day</span></div>`;
 }
 
 /* ---------------- music ---------------- */
 const song=$("#song"), playBtn=$("#play");
-const setPlaying=p=>{ document.body.classList.toggle("playing",p); playBtn.textContent=p?"❚❚":"▶"; playBtn.setAttribute("aria-label",p?"Pause music":"Play music"); };
+const setPlaying=p=>{ document.body.classList.toggle("playing",p); playBtn.innerHTML=p?'<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="3" y="2" width="2.4" height="10" rx="1" fill="currentColor"/><rect x="8.6" y="2" width="2.4" height="10" rx="1" fill="currentColor"/></svg>':'<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M4 2.2v9.6a.8.8 0 0 0 1.2.7l7.6-4.8a.8.8 0 0 0 0-1.4L5.2 1.5A.8.8 0 0 0 4 2.2z" fill="currentColor"/></svg>'; playBtn.setAttribute("aria-label",p?"Pause music":"Play music"); };
 song.addEventListener("play",()=>setPlaying(true)); song.addEventListener("pause",()=>setPlaying(false));
 playBtn.onclick=()=>{ if(song.paused){ song.play().catch(()=>toast("Tap again to play")); } else song.pause(); };
 
