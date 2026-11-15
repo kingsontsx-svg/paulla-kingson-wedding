@@ -236,6 +236,12 @@ body.locked{overflow:hidden}
 .done-mark circle{stroke:var(--lilac-deep);stroke-width:1.5;fill:none;stroke-dasharray:220;stroke-dashoffset:220;animation:draw 1.2s var(--ease) forwards}
 .done-mark path{stroke:var(--lilac-deep);stroke-width:2;fill:none;stroke-dasharray:50;stroke-dashoffset:50;animation:draw .7s var(--ease) .7s forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
+#pay-modal .card{max-height:calc(100dvh - 40px);overflow:auto;padding-top:clamp(22px,3vw,34px);padding-bottom:clamp(22px,3vw,34px)}
+#pay-modal .field{margin-bottom:18px}
+.amts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.amts button{border:1px solid var(--line-l);background:none;border-radius:999px;padding:9px 14px;font:500 .78rem var(--f-mono);letter-spacing:.06em;cursor:pointer;color:var(--ink);transition:border-color .3s,background .3s}
+.amts button[aria-pressed="true"]{border-color:var(--lilac-deep);background:rgba(184,162,220,.18)}
+.bank .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
 @media (max-width:860px){.rsvp-grid{grid-template-columns:1fr}.choice{grid-template-columns:1fr}}
 
@@ -540,7 +546,7 @@ body.playing .player .eq i:nth-child(2){animation-delay:.2s}body.playing .player
           <pre id="cash-details"></pre>
           <div style="display:flex;justify-content:space-between;align-items:end;gap:10px;position:relative;z-index:1">
             <span class="mono" style="color:var(--mute-d)">With love · 05.12.2026</span>
-            <button class="btn sm" type="button" id="copy-cash" hidden>Copy details</button>
+            <span class="acts"><button class="btn sm" type="button" id="copy-cash" hidden>Copy details</button><button class="btn sm solid" type="button" id="pay-open" hidden>Send a gift <span class="arr">→</span></button></span>
           </div>
         </div>
       </div>
@@ -648,6 +654,22 @@ body.playing .player .eq i:nth-child(2){animation-delay:.2s}body.playing .player
     <p class="status" id="gm-status" role="status"></p>
   </form>
 </div>
+<!-- cash gift checkout -->
+<div class="modal" id="pay-modal" role="dialog" aria-modal="true" aria-labelledby="pm-title">
+  <form class="card" id="pay-form" novalidate style="color:var(--ink)">
+    <p class="mono" style="color:var(--lilac-deep);margin:0 0 10px">Cash gift</p>
+    <h3 id="pm-title" style="font-size:2.2rem;margin-bottom:22px">Bless the couple</h3>
+    <div class="amts" id="pm-amts"><button type="button" data-a="10000">₦10,000</button><button type="button" data-a="25000">₦25,000</button><button type="button" data-a="50000">₦50,000</button><button type="button" data-a="100000">₦100,000</button><button type="button" data-a="250000">₦250,000</button></div>
+    <div class="field"><input id="pm-amount" name="amount" placeholder=" " inputmode="numeric" maxlength="14"><label for="pm-amount">Amount (₦)</label></div>
+    <div class="field"><input id="pm-name" name="name" placeholder=" " maxlength="60" autocomplete="name"><label for="pm-name">Your name</label></div>
+    <div class="field"><input id="pm-email" name="email" type="email" placeholder=" " maxlength="80" autocomplete="email"><label for="pm-email">Email (for your receipt)</label></div>
+    <div class="field"><input id="pm-phone" name="phone" placeholder=" " inputmode="tel" maxlength="20" autocomplete="tel"><label for="pm-phone">Phone (optional)</label></div>
+    <div class="field"><input id="pm-note" name="note" placeholder=" " maxlength="200"><label for="pm-note">A note to us (optional)</label></div>
+    <div class="row-actions"><button class="back" type="button" id="pm-cancel">Cancel</button><button class="btn solid" type="submit" id="pm-go">Continue to pay <span class="arr">→</span></button></div>
+    <p class="status" id="pm-status" role="status"></p>
+    <p class="mono" style="font-size:.62rem;color:#8a8190;margin:12px 0 0">Secure checkout by ALATPay · card, transfer or USSD</p>
+  </form>
+</div>
 <div class="toast" id="toast" role="status"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -703,7 +725,9 @@ function render(){
   // cash
   const cash = (S.cash_details || "").trim();
   $("#cash-details").textContent = cash || "Details coming soon.";
-  $("#copy-cash").hidden = !cash;
+  const canPay = !!(S.alatpay_key && S.alatpay_business);
+  $("#pay-open").hidden = !canPay;
+  $("#copy-cash").hidden = canPay || !cash;
   // travel
   $("#stay").innerHTML = S.stay_note ? esc(S.stay_note) : '<span class="tba">Suggestions coming soon</span>';
   const wa = (S.whatsapp||"").replace(/\D/g,"");
@@ -825,6 +849,45 @@ $$(".tabs button").forEach(b=>b.onclick=()=>{
   $$(".tabs button").forEach(x=>x.setAttribute("aria-selected", x===b));
   $$(".tabpanel").forEach(p=>p.classList.toggle("on", p.id===b.getAttribute("aria-controls")));
   if (b.id==="tab-fund") renderFund(true);
+});
+/* ---------------- ALATPay cash gift ---------------- */
+let payAmt=0, payLast=null;
+const pm=$("#pay-modal"), pf=$("#pay-form");
+const digits=v=>Number(String(v||"").replace(/[^\d]/g,""))||0;
+function openPay(){ payLast=document.activeElement; $("#pm-status").textContent=""; pm.classList.add("open"); setTimeout(()=>$("#pm-amount").focus(),300); }
+function closePay(){ if(!pm.classList.contains("open")) return; pm.classList.remove("open"); payLast&&payLast.focus(); }
+$("#pay-open").onclick=openPay; $("#pm-cancel").onclick=closePay;
+pm.addEventListener("click",e=>{ if(e.target===pm) closePay(); });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closePay(); });
+$$("#pm-amts button").forEach(b=>b.onclick=()=>{ $$("#pm-amts button").forEach(x=>x.setAttribute("aria-pressed",x===b)); $("#pm-amount").value=Number(b.dataset.a).toLocaleString("en-NG"); });
+$("#pm-amount").addEventListener("input",e=>{ const n=digits(e.target.value); e.target.value=n?n.toLocaleString("en-NG"):""; $$("#pm-amts button").forEach(x=>x.setAttribute("aria-pressed",Number(x.dataset.a)===n)); });
+function loadAlat(){ return new Promise((res,rej)=>{ if(window.Alatpay) return res(); const sc=document.createElement("script"); sc.src="https://web.alatpay.ng/js/alatpay.js"; sc.onload=()=>res(); sc.onerror=()=>rej(new Error("load")); document.head.appendChild(sc); }); }
+pf.addEventListener("submit", async e=>{
+  e.preventDefault();
+  const st=$("#pm-status"), amount=digits(pf.amount.value), name=pf.name.value.trim(), email=pf.email.value.trim(), phone=pf.phone.value.trim(), note=pf.note.value.trim();
+  if(amount<100) return st.textContent="Please choose or enter an amount.";
+  if(!name) return st.textContent="Please add your name.";
+  if(!/^\S+@\S+\.\S+$/.test(email)) return st.textContent="Please add a valid email for your receipt.";
+  st.textContent=""; const go=$("#pm-go"); go.disabled=true;
+  try{ await loadAlat(); }catch{ go.disabled=false; return st.textContent="Payment couldn't load. Check your connection and try again."; }
+  go.disabled=false;
+  const [firstName,...rest]=name.split(/\s+/);
+  closePay();
+  try{
+    Alatpay.setup({
+      apiKey:S.alatpay_key, businessId:S.alatpay_business,
+      email, phone, firstName, lastName:rest.join(" ")||firstName,
+      amount, currency:"NGN", color:"#6f539b",
+      metadata:{ purpose:"Wedding cash gift", note },
+      onTransaction:(r)=>{
+        const ref=(r&&r.data&&(r.data.orderId||r.data.id))||"";
+        api("/api/pledge",{name,contact:email+(phone?" · "+phone:""),amount,message:("ALATPay"+(ref?" "+ref:"")+(note?" · "+note:"")).slice(0,300)}).catch(()=>{});
+        pf.reset(); payAmt=0; $$("#pm-amts button").forEach(x=>x.setAttribute("aria-pressed","false"));
+        toast("Thank you so much! Your gift means the world to us.");
+      },
+      onClose:()=>{}
+    }).show();
+  }catch{ toast("Payment couldn't start. Please try again."); }
 });
 $("#copy-cash").onclick = async () => { try { await navigator.clipboard.writeText(S.cash_details); toast("Copied. Thank you!"); } catch { toast("Select the details to copy them."); } };
 function renderGifts(){

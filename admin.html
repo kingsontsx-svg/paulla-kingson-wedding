@@ -175,7 +175,7 @@ progress{width:100%;height:6px;accent-color:var(--lilac-deep)}
       <button data-tab="rsvps">RSVPs</button>
       <button data-tab="approvals">Approvals <span class="badge" id="b-appr" hidden></span></button>
       <button data-tab="gifts">Gifts <span class="badge" id="b-gift" hidden></span></button>
-      <button data-tab="fund">Honeymoon fund <span class="badge" id="b-fund" hidden></span></button>
+      <button data-tab="fund">Cash gifts <span class="badge" id="b-fund" hidden></span></button>
       <button data-tab="content">Content</button>
       <button data-tab="media">Photos &amp; music</button>
     </nav>
@@ -221,9 +221,9 @@ progress{width:100%;height:6px;accent-color:var(--lilac-deep)}
 
     <!-- Fund -->
     <section class="panel" id="p-fund">
-      <div class="head"><h2>Honeymoon fund</h2></div>
+      <div class="head"><h2>Cash gifts</h2></div>
       <div class="tiles" id="ftiles" style="margin-bottom:16px"></div>
-      <p class="muted" style="margin:0 0 14px">Pledges count toward the total on the site only after you mark them as received.</p>
+      <p class="muted" style="margin:0 0 14px">Gifts paid through ALATPay appear here. Check them against your ALATPay dashboard, then mark them received.</p>
       <div class="tablewrap"><table><thead><tr><th>Name</th><th>Amount</th><th>Contact</th><th>Note</th><th>Status</th><th>When</th><th></th></tr></thead><tbody id="frows"></tbody></table></div>
     </section>
 
@@ -247,6 +247,7 @@ progress{width:100%;height:6px;accent-color:var(--lilac-deep)}
           <div class="two"><label class="f"><span>Cash gift title</span><input name="cash_title"></label><label class="f"><span>Honeymoon fund goal (₦)</span><input name="fund_goal" inputmode="numeric"></label></div>
           <label class="f"><span>Cash gift intro</span><textarea name="cash_note"></textarea></label>
           <label class="f"><span>Cash gift details</span><textarea name="cash_details" placeholder="Bank&#10;Account name&#10;Account number"></textarea><small>Shown exactly as typed on the gift card, with a Copy button.</small></label>
+          <div class="two"><label class="f"><span>ALATPay public key</span><input name="alatpay_key" autocomplete="off" spellcheck="false"><small>From ALATPay dashboard → Settings → Business. Use the <b>public</b> (primary) key, never the secret key.</small></label><label class="f"><span>ALATPay business ID</span><input name="alatpay_business" autocomplete="off" spellcheck="false"><small>The "Send a gift" button appears once both are filled.</small></label></div>
           <label class="f"><span>Honeymoon fund note</span><textarea name="fund_note"></textarea></label>
         </div>
         <div class="fs"><h3>Getting there</h3>
@@ -428,9 +429,9 @@ gform.addEventListener("submit", async e => {
 /* ---------- fund ---------- */
 function renderFund(){
   const goal = Number(D.settings.fund_goal)||0, rec = D.pledges.filter(p=>p.status==="received").reduce((s,p)=>s+Number(p.amount),0), pend = D.pledges.filter(p=>p.status==="pending").reduce((s,p)=>s+Number(p.amount),0);
-  $("#ftiles").innerHTML = `<div class="tile dark"><span class="mono">Received</span><b style="font-size:2.2rem">${naira(rec)}</b><small>${goal?Math.round(rec/goal*100)+"% of "+naira(goal):""}</small></div><div class="tile"><span class="mono muted">Pledged, not yet received</span><b style="font-size:2.2rem">${naira(pend)}</b></div>`;
+  $("#ftiles").innerHTML = `<div class="tile dark"><span class="mono">Received</span><b style="font-size:2.2rem">${naira(rec)}</b><small>${goal?Math.round(rec/goal*100)+"% of "+naira(goal):""}</small></div><div class="tile"><span class="mono muted">Awaiting check</span><b style="font-size:2.2rem">${naira(pend)}</b></div>`;
   $("#frows").innerHTML = D.pledges.map(p=>`<tr><td>${esc(p.name)}</td><td>${naira(p.amount)}</td><td>${esc(p.contact)}</td><td>${esc(p.message)}</td><td><span class="pill ${p.status}">${p.status}</span></td><td class="muted">${when(p.created_at)}</td>
-    <td><div class="acts">${p.status==="pending"?`<button class="btn ok sm" data-act="received" data-type="pledge" data-id="${p.id}">Mark received</button>`:`<button class="btn ghost sm" data-act="pending" data-type="pledge" data-id="${p.id}">Undo</button>`}${del("pledge",p.id)}</div></td></tr>`).join("") || '<tr><td colspan="7" class="muted">No pledges yet.</td></tr>';
+    <td><div class="acts">${p.status==="pending"?`<button class="btn ok sm" data-act="received" data-type="pledge" data-id="${p.id}">Mark received</button>`:`<button class="btn ghost sm" data-act="pending" data-type="pledge" data-id="${p.id}">Undo</button>`}${del("pledge",p.id)}</div></td></tr>`).join("") || '<tr><td colspan="7" class="muted">No gifts yet.</td></tr>';
 }
 
 /* ---------- moderation actions ---------- */
@@ -445,7 +446,7 @@ document.addEventListener("click", async e => {
 
 /* ---------- content ---------- */
 const cform = $("#cform"); let dirty = false;
-const KEYS = ["bride","groom","invite_line","families","date_iso","time_label","venue_name","city","venue_address","dress_code","dress_note","rsvp_deadline","whatsapp","cash_title","fund_goal","cash_note","cash_details","fund_note","travel_note","stay_note"];
+const KEYS = ["bride","groom","invite_line","families","date_iso","time_label","venue_name","city","venue_address","dress_code","dress_note","rsvp_deadline","whatsapp","cash_title","fund_goal","cash_note","cash_details","alatpay_key","alatpay_business","fund_note","travel_note","stay_note"];
 function fillContent(){
   KEYS.forEach(k => { if (cform[k]) cform[k].value = D.settings[k] ?? ""; });
   let faqs = []; try { faqs = JSON.parse(D.settings.faq || "[]"); } catch {}
