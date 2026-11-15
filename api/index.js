@@ -54,6 +54,8 @@ const DEFAULTS = {
   cash_title: "Cash gift",
   cash_note: "Your presence is the greatest gift. If you'd like to bless us further, you can send a gift here.",
   cash_details: "",
+  alatpay_key: "",
+  alatpay_business: "",
   fund_goal: "1500000",
   fund_note: "Help us make memories on our honeymoon. Every contribution brings us closer.",
   travel_note: "Port Harcourt International Airport (PHC), Omagwa, has daily flights from Abuja and Lagos. December fares climb quickly, so book early.",
